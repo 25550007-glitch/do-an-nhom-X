@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống HR - Quản Lý Nhân Viên</title>
+    <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>🏢 HR System</h2>
+                <p>Hệ thống quản lý nhân sự</p>
+            </div>
+            
+            <div class="menu-section">
+                <div class="menu-section-title">Tổng Quan</div>
+                <div class="menu-item active" data-section="dashboard">
+                    <span class="menu-icon">📊</span>
+                    <span>Dashboard</span>
+                </div>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-section-title">Nhân Sự</div>
+                <div class="menu-item" data-section="nhanvien">
+                    <span class="menu-icon">👥</span>
+                    <span>Nhân Viên</span>
+                </div>
+                <div class="menu-item" data-section="phongban">
+                    <span class="menu-icon">🏢</span>
+                    <span>Phòng Ban</span>
+                </div>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-section-title">Chấm Công & Lương</div>
+                <div class="menu-item" data-section="chamcong">
+                    <span class="menu-icon">⏰</span>
+                    <span>Chấm Công</span>
+                </div>
+                <div class="menu-item" data-section="luong">
+                    <span class="menu-icon">💰</span>
+                    <span>Bảng Lương</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 id="pageTitle">Dashboard</h1>
+                <div class="header-actions">
+                    ⏰<span id="currentDate"></span>
+                </div>
+            </div>
+
+            <div class="content-wrapper">
+                <div class="alert alert-success" id="alertSuccess">
+                    <span>✓</span>
+                    <span id="alertSuccessText"></span>
+                </div>
+                <div class="alert alert-error" id="alertError">
+                    <span>✗</span>
+                    <span id="alertErrorText"></span>
+                </div>
+
+                <!-- Dashboard Section -->
+                <div class="content-section active" id="dashboard">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                📊 Tổng Quan Hệ Thống
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nhân Viên Section -->
+                <div class="content-section" id="nhanvien">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">➕ Thêm Nhân Viên Mới</div>
+                        </div>
+                        <form id="formNhanVien">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Mã Nhân Viên <span class="required">*</span></label>
+                                    <input type="text" name="MaNV" placeholder="VD: NV001" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Họ và Tên <span class="required">*</span></label>
+                                    <input type="text" name="TenNV" placeholder="Nguyễn Văn A" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Phòng Ban</label>
+                                    <select name="MaPB" id="selectPhongBan">
+                                        <option value="">-- Chọn phòng ban --</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Lương Cơ Bản (VNĐ)</label>
+                                    <input type="number" name="LuongCoBan" placeholder="8000000" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label>Ngày Sinh</label>
+                                    <input type="date" name="NgaySinh">
+                                </div>
+                                <div class="form-group">
+                                    <label>Ngày Vào Làm</label>
+                                    <input type="date" name="NgayVaoLam">
+                                </div>
+                                <div class="form-group">
+                                    <label>Số Điện Thoại</label>
+                                    <input type="tel" name="SoDienThoai" placeholder="0901234567">
+                                </div>
+                                <div class="form-group">
+                                    <label>Địa Chỉ</label>
+                                    <input type="text" name="DiaChi" placeholder="Quận 1, TP.HCM">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <span>➕</span> Thêm Nhân Viên
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">👥 Danh Sách Nhân Viên</div>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Mã NV</th>
+                                        <th>Họ Tên</th>
+                                        <th>Phòng Ban</th>
+                                        <th>Lương CB</th>
+                                        <th>SĐT</th>
+                                        <th>Trạng Thái</th>
+                                        <th>Thao Tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tableNhanVien"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phòng Ban Section -->
+                <div class="content-section" id="phongban">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">➕ Thêm Phòng Ban</div>
+                        </div>
+                        <form id="formPhongBan">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Mã Phòng Ban <span class="required">*</span></label>
+                                    <input type="text" name="MaPB" placeholder="VD: PB01" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Tên Phòng Ban <span class="required">*</span></label>
+                                    <input type="text" name="TenPB" placeholder="Phòng Kỹ Thuật" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Mô Tả</label>
+                                <textarea name="MoTa" placeholder="Mô tả chi tiết về phòng ban..." rows="3"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <span>➕</span> Thêm Phòng Ban
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">🏢 Danh Sách Phòng Ban</div>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Mã PB</th>
+                                        <th>Tên Phòng Ban</th>
+                                        <th>Mô Tả</th>
+                                        <th>Ngày Tạo</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablePhongBan"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chấm Công Section - NÂNG CẤP -->
+                <div class="content-section" id="chamcong">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">⏰ Nhập Chấm Công Chi Tiết</div>
+                        </div>
+                        <form id="formChamCong">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Nhân Viên <span class="required">*</span></label>
+                                    <select name="MaNV" id="selectNhanVien" required>
+                                        <option value="">-- Chọn nhân viên --</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Ngày <span class="required">*</span></label>
+                                    <input type="date" name="Ngay" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Giờ Vào <span class="required">*</span></label>
+                                    <input type="time" name="GioVao" id="gioVao" value="08:00">
+                                </div>
+                                <div class="form-group">
+                                    <label>Giờ Ra <span class="required">*</span></label>
+                                    <input type="time" name="GioRa" id="gioRa" value="17:00">
+                                </div>
+                                <div class="form-group">
+                                    <label>Tổng Giờ Làm <span class="required">*</span></label>
+                                    <input type="number" name="GioLam" id="gioLam" step="0.5" value="8" required readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>Loại Công <span class="required">*</span></label>
+                                    <select name="LoaiCong" id="loaiCong" required>
+                                        <option value="Thường">Thường (x1.0)</option>
+                                        <option value="Tăng ca">Tăng ca (x1.5)</option>
+                                        <option value="Nghỉ phép">Nghỉ phép có lương</option>
+                                        <option value="Nghỉ không lương">Nghỉ không lương</option>
+                                        <option value="Chủ nhật">Chủ nhật (x2.0)</option>
+                                        <option value="Lễ">Ngày lễ (x3.0)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Trạng Thái</label>
+                                    <select name="TrangThai">
+                                        <option value="Đúng giờ">Đúng giờ</option>
+                                        <option value="Đi muộn">Đi muộn</option>
+                                        <option value="Về sớm">Về sớm</option>
+                                        <option value="Thiếu giờ">Thiếu giờ</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Phòng/Ca Làm Việc</label>
+                                    <select name="CaLamViec">
+                                        <option value="Hành chính">Hành chính (8h-17h)</option>
+                                        <option value="Ca sáng">Ca sáng (6h-14h)</option>
+                                        <option value="Ca chiều">Ca chiều (14h-22h)</option>
+                                        <option value="Ca đêm">Ca đêm (22h-6h)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Ghi Chú / Lý Do</label>
+                                <textarea name="GhiChu" placeholder="Nhập ghi chú, lý do đi muộn, nghỉ phép..." rows="2"></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">
+                                <span>💾</span> Lưu Chấm Công
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">📋 Lịch Sử Chấm Công</div>
+                        </div>
+                        
+                        <div class="filter-bar">
+                            <div class="form-group">
+                                <label>Tháng</label>
+                                <input type="number" id="filterThangCC" min="1" max="12" value="10">
+                            </div>
+                            <div class="form-group">
+                                <label>Năm</label>
+                                <input type="number" id="filterNamCC" value="2025">
+                            </div>
+                            <div class="form-group">
+                                <label>Nhân viên</label>
+                                <select id="filterNhanVienCC">
+                                    <option value="">Tất cả</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Loại công</label>
+                                <select id="filterLoaiCong">
+                                    <option value="">Tất cả</option>
+                                    <option value="Thường">Thường</option>
+                                    <option value="Tăng ca">Tăng ca</option>
+                                    <option value="Nghỉ phép">Nghỉ phép</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary" onclick="loadChamCong()">
+                                <span>🔍</span> Lọc
+                            </button>
+                        </div>
+
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Ngày</th>
+                                        <th>Mã NV</th>
+                                        <th>Họ Tên</th>
+                                        <th>Giờ Vào</th>
+                                        <th>Giờ Ra</th>
+                                        <th>Giờ Làm</th>
+                                        <th>Loại Công</th>
+                                        <th>Trạng Thái</th>
+                                        <th>Ghi Chú</th>
+                                        <th>Thao Tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tableChamCong"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lương Section - NÂNG CẤP -->
+                <div class="content-section" id="luong">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">💰 Tính Lương Hàng Tháng</div>
+                        </div>
+                        <form id="formTinhLuong">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Tháng <span class="required">*</span></label>
+                                    <select name="Thang" required>
+                                        <option value="">-- Chọn tháng --</option>
+                                        <option value="1">Tháng 1</option>
+                                        <option value="2">Tháng 2</option>
+                                        <option value="3">Tháng 3</option>
+                                        <option value="4">Tháng 4</option>
+                                        <option value="5">Tháng 5</option>
+                                        <option value="6">Tháng 6</option>
+                                        <option value="7">Tháng 7</option>
+                                        <option value="8">Tháng 8</option>
+                                        <option value="9">Tháng 9</option>
+                                        <option value="10" selected>Tháng 10</option>
+                                        <option value="11">Tháng 11</option>
+                                        <option value="12">Tháng 12</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Năm <span class="required">*</span></label>
+                                    <input type="number" name="Nam" value="2025" min="2020" max="2030" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Lương Theo Giờ (VNĐ) <span class="required">*</span></label>
+                                    <input type="number" name="LuongTheoGio" value="50000" step="1000" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Hệ Số Tăng Ca <span class="required">*</span></label>
+                                    <input type="number" name="HeSoTangCa" value="1.5" step="0.1" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success">
+                                <span>🧮</span> Tính Lương Toàn Bộ Nhân Viên
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- BẢNG LƯƠNG CHI TIẾT -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">📊 Bảng Lương Chi Tiết</div>
+                        </div>
+                        
+                        <div class="filter-bar">
+                            <div class="form-group">
+                                <label>Tháng</label>
+                                <input type="number" id="filterThangLuong" min="1" max="12" value="10">
+                            </div>
+                            <div class="form-group">
+                                <label>Năm</label>
+                                <input type="number" id="filterNamLuong" value="2025">
+                            </div>
+                            <div class="form-group">
+                                <label>Phòng ban</label>
+                                <select id="filterPhongBanLuong">
+                                    <option value="">Tất cả phòng ban</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary" onclick="loadLuong()">
+                                <span>🔍</span> Lọc
+                            </button>
+                        </div>
+
+                        <!-- Tổng hợp lương -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                            <div>
+                                <div style="font-size: 12px; color: #6c757d;">Tổng Lương CB</div>
+                                <div style="font-size: 20px; font-weight: bold; color: #1e3c72;" id="sumLuongCB">0đ</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: #6c757d;">Tổng Theo Giờ</div>
+                                <div style="font-size: 20px; font-weight: bold; color: #28a745;" id="sumTheoGio">0đ</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: #6c757d;">Tổng Tăng Ca</div>
+                                <div style="font-size: 20px; font-weight: bold; color: #ffc107;" id="sumTangCa">0đ</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: #6c757d;">Tổng Thưởng</div>
+                                <div style="font-size: 20px; font-weight: bold; color: #17a2b8;" id="sumThuong">0đ</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: #6c757d;">TỔNG CHI TRẢ</div>
+                                <div style="font-size: 24px; font-weight: bold; color: #dc3545;" id="sumTotal">0đ</div>
+                            </div>
+                        </div>
+
+                        <div class="table-container">
+                            <table id="tableSalary">
+                                <thead>
+                                    <tr>
+                                        <th>STT</th>
+                                        <th>Mã NV</th>
+                                        <th>Họ Tên</th>
+                                        <th>Phòng Ban</th>
+                                        <th>Lương CB</th>
+                                        <th>Theo Giờ</th>
+                                        <th>Tăng Ca</th>
+                                        <th>Thưởng</th>
+                                        <th>Phụ Cấp</th>
+                                        <th>Khấu Trừ</th>
+                                        <th>Tổng Lương</th>
+                                        <th>Thao Tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tableLuong"></tbody>
+                                <tfoot>
+                                    <tr style="background: #f8f9fa; font-weight: bold;">
+                                        <td colspan="4">TỔNG CỘNG</td>
+                                        <td id="footerLuongCB">0đ</td>
+                                        <td id="footerTheoGio">0đ</td>
+                                        <td id="footerTangCa">0đ</td>
+                                        <td id="footerThuong">0đ</td>
+                                        <td id="footerPhuCap">0đ</td>
+                                        <td id="footerKhauTru">0đ</td>
+                                        <td id="footerTotal" style="color: #dc3545; font-size: 16px;">0đ</td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
