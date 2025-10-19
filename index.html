@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ Thống HR - Quản Lý Nhân Viên</title>
     <link rel="stylesheet" href="./assets/style.css">
 </head>
+
 <body>
     <div class="container">
         <!-- Sidebar -->
@@ -14,7 +16,7 @@
                 <h2>🏢 HR System</h2>
                 <p>Hệ thống quản lý nhân sự</p>
             </div>
-            
+
             <div class="menu-section">
                 <div class="menu-section-title">Tổng Quan</div>
                 <div class="menu-item active" data-section="dashboard">
@@ -225,7 +227,8 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Tổng Giờ Làm <span class="required">*</span></label>
-                                    <input type="number" name="GioLam" id="gioLam" step="0.5" value="8" required readonly>
+                                    <input type="number" name="GioLam" id="gioLam" step="0.5" value="8" required
+                                        readonly>
                                 </div>
                                 <div class="form-group">
                                     <label>Loại Công <span class="required">*</span></label>
@@ -257,10 +260,11 @@
                                     </select>
                                 </div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label>Ghi Chú / Lý Do</label>
-                                <textarea name="GhiChu" placeholder="Nhập ghi chú, lý do đi muộn, nghỉ phép..." rows="2"></textarea>
+                                <textarea name="GhiChu" placeholder="Nhập ghi chú, lý do đi muộn, nghỉ phép..."
+                                    rows="2"></textarea>
                             </div>
 
                             <button type="submit" class="btn btn-primary">
@@ -273,7 +277,7 @@
                         <div class="card-header">
                             <div class="card-title">📋 Lịch Sử Chấm Công</div>
                         </div>
-                        
+
                         <div class="filter-bar">
                             <div class="form-group">
                                 <label>Tháng</label>
@@ -359,12 +363,12 @@
                                     <label>Lương Theo Giờ (VNĐ) <span class="required">*</span></label>
                                     <input type="number" name="LuongTheoGio" value="50000" step="1000" required>
                                 </div>
-                                <div class="form-group">
+                                <!-- <div class="form-group">
                                     <label>Hệ Số Tăng Ca <span class="required">*</span></label>
                                     <input type="number" name="HeSoTangCa" value="1.5" step="0.1" required>
-                                </div>
+                                </div> -->
                             </div>
-                            <button type="submit" class="btn btn-success">
+                            <button type="button" id="btnTinhLuong" class="btn btn-success">
                                 <span>🧮</span> Tính Lương Toàn Bộ Nhân Viên
                             </button>
                         </form>
@@ -375,7 +379,7 @@
                         <div class="card-header">
                             <div class="card-title">📊 Bảng Lương Chi Tiết</div>
                         </div>
-                        
+
                         <div class="filter-bar">
                             <div class="form-group">
                                 <label>Tháng</label>
@@ -397,14 +401,17 @@
                         </div>
 
                         <!-- Tổng hợp lương -->
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                        <div
+                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
                             <div>
                                 <div style="font-size: 12px; color: #6c757d;">Tổng Lương CB</div>
-                                <div style="font-size: 20px; font-weight: bold; color: #1e3c72;" id="sumLuongCB">0đ</div>
+                                <div style="font-size: 20px; font-weight: bold; color: #1e3c72;" id="sumLuongCB">0đ
+                                </div>
                             </div>
                             <div>
                                 <div style="font-size: 12px; color: #6c757d;">Tổng Theo Giờ</div>
-                                <div style="font-size: 20px; font-weight: bold; color: #28a745;" id="sumTheoGio">0đ</div>
+                                <div style="font-size: 20px; font-weight: bold; color: #28a745;" id="sumTheoGio">0đ
+                                </div>
                             </div>
                             <div>
                                 <div style="font-size: 12px; color: #6c757d;">Tổng Tăng Ca</div>
@@ -460,5 +467,6 @@
         </div>
     </div>
 </body>
-    <script src="./js/main.js"></script>
+<script src="./js/main.js?v=123"></script>
+
 </html>

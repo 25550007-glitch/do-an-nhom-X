@@ -1,8 +1,10 @@
 <?php
 include 'db.php';
 
-// Lấy danh sách lương, join bảng nhân viên và phòng ban
-$sql = " SELECT 
+$thang = isset($_GET['thang']) ? intval($_GET['thang']) : date('n');
+
+// Chỉ lấy lương của tháng được chọn
+$sql = "SELECT 
         l.MaLuong,
         l.MaNV,
         nv.HoTen,
@@ -17,6 +19,7 @@ $sql = " SELECT
     FROM Luong l
     LEFT JOIN NhanVien nv ON l.MaNV = nv.MaNV
     LEFT JOIN PhongBan pb ON nv.MaPB = pb.MaPB
+    WHERE l.Thang = $thang
     ORDER BY l.MaLuong ASC";
 
 $result = $conn->query($sql);

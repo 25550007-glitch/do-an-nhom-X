@@ -1,3 +1,4 @@
+console.log("🚀 main.js loaded thành công!");
 
 // Hiển thị ngày hiện tại
 document.getElementById('currentDate').textContent = new Date().toLocaleDateString('vi-VN', {
@@ -35,23 +36,37 @@ document.addEventListener("DOMContentLoaded", () => {
     loadChamCong();
     loadLuong();
 
-    // Gửi form thêm nhân viên
-    document.getElementById("formNhanVien").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const res = await fetch("api/add_nhanvien.php", {
-            method: "POST",
+
+    // Gửi form tính lương
+    document.getElementById('btnTinhLuong').addEventListener('click', async () => {
+        console.log("🟡 Button clicked!");
+    const form = document.getElementById('formTinhLuong');
+    const formData = new FormData(form);
+
+    const thang = formData.get("Thang"); // 👈 lấy tháng người chọn
+    const nam = formData.get("Nam");
+    
+    try {
+        console.log("🔹 Gửi request tới tinh_luong.php...");
+        const response = await fetch('api/tinh_luong.php', {
+            method: 'POST',
             body: formData
         });
-        const data = await res.json();
-        if (data.success) {
-            alert("✅ Thêm nhân viên thành công!");
-            e.target.reset();
-            loadNhanVien();
-        } else {
-            alert("❌ Lỗi: " + data.error);
+        const result = await response.json();
+
+        // Nếu tính lương thành công thì load lại danh sách lương
+        if (result.status === 'success') {
+            console.log(`✅ Load bảng lương tháng ${thang}/${nam}`);
+            await loadLuong(thang);
         }
-    });
+
+    } catch (err) {
+        console.error('❌ Lỗi khi tính lương:', err);
+        alert('⚠️ Lỗi kết nối đến server!');
+    }
+});
+
+
 });
 
 async function loadPhongBan() {
@@ -119,9 +134,9 @@ async function loadChamCong() {
     }
 }
 
-async function loadLuong() {
+async function loadLuong(thang) {
     try {
-        const res = await fetch("api/get_luong.php");
+        const res = await fetch(`api/get_luong.php?thang=${thang}`);
         const data = await res.json();
         const tbody = document.getElementById("tableLuong");
         tbody.innerHTML = "";
@@ -163,6 +178,12 @@ async function loadLuong() {
         document.getElementById("footerPhuCap").textContent = tongPhuCap.toLocaleString() + "đ";
         document.getElementById("footerKhauTru").textContent = tongKhauTru.toLocaleString() + "đ";
         document.getElementById("footerTotal").textContent = tongTongLuong.toLocaleString() + "đ";
+
+        document.getElementById("sumLuongCB").textContent = tongLuongCB.toLocaleString() + "đ";
+        document.getElementById("sumTheoGio").textContent = tongTheoGio.toLocaleString() + "đ";
+        document.getElementById("sumTangCa").textContent = tongTangCa.toLocaleString() + "đ";
+        document.getElementById("sumThuong").textContent = tongThuong.toLocaleString() + "đ";
+        document.getElementById("sumTotal").textContent = tongTongLuong.toLocaleString() + "đ";
 
     } catch (error) {
         console.error("❌ Lỗi load lương:", error);
