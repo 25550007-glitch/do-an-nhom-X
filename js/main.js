@@ -39,34 +39,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Gửi form tính lương
     document.getElementById('btnTinhLuong').addEventListener('click', async () => {
-        console.log("🟡 Button clicked!");
-    const form = document.getElementById('formTinhLuong');
-    const formData = new FormData(form);
+        const form = document.getElementById('formTinhLuong');
+        const formData = new FormData(form);
 
-    const thang = formData.get("Thang"); // 👈 lấy tháng người chọn
-    const nam = formData.get("Nam");
-    
-    try {
-        console.log("🔹 Gửi request tới tinh_luong.php...");
-        const response = await fetch('api/tinh_luong.php', {
-            method: 'POST',
-            body: formData
-        });
-        const result = await response.json();
+        const thang = formData.get("Thang");
 
-        // Nếu tính lương thành công thì load lại danh sách lương
-        if (result.status === 'success') {
-            console.log(`✅ Load bảng lương tháng ${thang}/${nam}`);
-            await loadLuong(thang);
+        try {
+            const response = await fetch('api/tinh_luong.php', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            console.log(result);
+
+            // Sau khi tính xong có thể load lại danh sách lương
+            loadLuong(thang); 
+        } catch (error) {
+            console.error("Lỗi:", error);
+            alert("Đã xảy ra lỗi khi tính lương!");
         }
-
-    } catch (err) {
-        console.error('❌ Lỗi khi tính lương:', err);
-        alert('⚠️ Lỗi kết nối đến server!');
-    }
-});
-
-
+    });
 });
 
 async function loadPhongBan() {
@@ -141,11 +133,11 @@ async function loadLuong(thang) {
         const tbody = document.getElementById("tableLuong");
         tbody.innerHTML = "";
 
-        let tongLuongCB = 0, tongTheoGio = 0, tongTangCa = 0, tongThuong = 0, tongPhuCap = 0, tongKhauTru = 0, tongTongLuong = 0;
+        let tongLuongCB = 0, tongGioLam = 0, tongTangCa = 0, tongThuong = 0, tongPhuCap = 0, tongKhauTru = 0, tongTongLuong = 0;
 
         data.forEach((l, index) => {
             tongLuongCB += Number(l.LuongCB);
-            tongTheoGio += Number(l.TheoGio);
+            tongGioLam += Number(l.TongGioLam);
             tongTangCa += Number(l.TangCa);
             tongThuong += Number(l.Thuong);
             tongPhuCap += Number(l.PhuCap);
@@ -159,7 +151,7 @@ async function loadLuong(thang) {
                 <td>${l.HoTen}</td>
                 <td>${l.TenPhongBan || "-"}</td>
                 <td>${Number(l.LuongCB).toLocaleString()} ₫</td>
-                <td>${Number(l.TheoGio).toLocaleString()} ₫</td>
+                <td>${Number(l.TongGioLam).toLocaleString()}</td>
                 <td>${Number(l.TangCa).toLocaleString()} ₫</td>
                 <td>${Number(l.Thuong).toLocaleString()} ₫</td>
                 <td>${Number(l.PhuCap).toLocaleString()} ₫</td>
@@ -172,7 +164,7 @@ async function loadLuong(thang) {
 
         // Footer tổng cộng
         document.getElementById("footerLuongCB").textContent = tongLuongCB.toLocaleString() + "đ";
-        document.getElementById("footerTheoGio").textContent = tongTheoGio.toLocaleString() + "đ";
+        document.getElementById("footerTheoGio").textContent = tongGioLam.toLocaleString();
         document.getElementById("footerTangCa").textContent = tongTangCa.toLocaleString() + "đ";
         document.getElementById("footerThuong").textContent = tongThuong.toLocaleString() + "đ";
         document.getElementById("footerPhuCap").textContent = tongPhuCap.toLocaleString() + "đ";
@@ -180,7 +172,6 @@ async function loadLuong(thang) {
         document.getElementById("footerTotal").textContent = tongTongLuong.toLocaleString() + "đ";
 
         document.getElementById("sumLuongCB").textContent = tongLuongCB.toLocaleString() + "đ";
-        document.getElementById("sumTheoGio").textContent = tongTheoGio.toLocaleString() + "đ";
         document.getElementById("sumTangCa").textContent = tongTangCa.toLocaleString() + "đ";
         document.getElementById("sumThuong").textContent = tongThuong.toLocaleString() + "đ";
         document.getElementById("sumTotal").textContent = tongTongLuong.toLocaleString() + "đ";
