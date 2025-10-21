@@ -1,20 +1,25 @@
 <?php
-include 'db.php'; // file kết nối CSDL
+include 'db.php';
 
 header('Content-Type: application/json; charset=utf-8');
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// ✅ Chỉ xử lý khi phương thức là POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $maNV = $_POST['MaNV'] ?? '';
-    $hoTen = $_POST['HoTen'] ?? '';
-    $maPB = $_POST['MaPB'] ?? '';
-    $luongCB = $_POST['LuongCB'] ?? '';
-    $sdt = $_POST['SDT'] ?? '';
+    $hoTen = $_POST['TenNV'] ?? '';
+    $maPB = $_POST['MaPB'] ?? null;
+    $luongCB = $_POST['LuongCoBan'] ?? 0;
+    $ngaySinh = $_POST['NgaySinh'] ?? null;
+    $ngayVaoLam = $_POST['NgayVaoLam'] ?? null;
+    $sdt = $_POST['SoDienThoai'] ?? null;
     $trangThai = $_POST['TrangThai'] ?? '';
 
-    // Kiểm tra dữ liệu bắt buộc
+    // ✅ Nếu trống thì set NULL hoặc giá trị mặc định
+    $ngaySinh = !empty($ngaySinh) ? $ngaySinh : null;
+    $ngayVaoLam = !empty($ngayVaoLam) ? $ngayVaoLam : null;
+    $trangThai = !empty($trangThai) ? $trangThai : 'Đang làm';
+
     if (empty($maNV) || empty($hoTen)) {
         echo json_encode(['success' => false, 'error' => 'Thiếu thông tin nhân viên!']);
         exit;
@@ -23,16 +28,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $stmt = $conn->prepare("
             UPDATE nhanvien
-            SET HoTen = ?, MaPB = ?, LuongCB = ?, SDT = ?, TrangThai = ?
+            SET HoTen = ?, MaPB = ?, LuongCB = ?, NgaySinh = ?, NgayVaoLam = ?, SDT = ?, TrangThai = ?
             WHERE MaNV = ?
         ");
-        $stmt->bind_param("sidsss", $hoTen, $maPB, $luongCB, $sdt, $trangThai, $maNV);
 
+        // Gán kiểu dữ liệu phù hợp
+        $stmt->bind_param(
+            "sidsssss",
+            $hoTen,
+            $maPB,
+            $luongCB,
+            $ngaySinh,
+            $ngayVaoLam,
+            $sdt,
+            $trangThai,
+            $maNV
+        );
 
         if ($stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Cập nhật nhân viên thành công!']);
         } else {
-            echo json_encode(['success' => false, 'error' => 'Không thể cập nhật nhân viên!']);
+            echo json_encode(['success' => false, 'error' => $stmt->error]);
         }
 
         $stmt->close();

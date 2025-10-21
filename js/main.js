@@ -136,9 +136,10 @@ async function loadPhongBan() {
 async function loadNhanVien() {
     const res = await fetch("api/get_nhanvien.php");
     const data = await res.json();
+       const nhanviens = data.nhanvien;
     const tbody = document.getElementById("tableNhanVien");
     tbody.innerHTML = "";
-    data.forEach(nv => {
+    nhanviens.forEach(nv => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
             <td>${nv.MaNV}</td>
@@ -146,6 +147,8 @@ async function loadNhanVien() {
             <td>${nv.TenPhongBan || "-"}</td>
             <td>${Number(nv.LuongCB).toLocaleString()} ₫</td>
             <td>${nv.SDT || ""}</td>
+            <td>${nv.NgaySinh || "-"}</td>
+            <td>${nv.NgayVaoLam || "-"}</td>
             <td>${nv.TrangThai}</td>
             <td><button class="btn-edit" onclick="editNhanVien('${nv.MaNV}')">✏️</button></td>
         `;
@@ -251,12 +254,12 @@ async function editNhanVien(MaNV) {
 
         // Gán dữ liệu lên form
         document.querySelector("input[name='MaNV']").value = nv.MaNV;
-        document.querySelector("input[name='TenNV']").value = nv.TenNV;
+        document.querySelector("input[name='TenNV']").value = nv.HoTen;
         document.querySelector("select[name='MaPB']").value = nv.MaPB || "";
-        document.querySelector("input[name='LuongCoBan']").value = nv.LuongCoBan || 0;
+        document.querySelector("input[name='LuongCoBan']").value = nv.LuongCB || 0;
         document.querySelector("input[name='NgaySinh']").value = nv.NgaySinh || "";
         document.querySelector("input[name='NgayVaoLam']").value = nv.NgayVaoLam || "";
-        document.querySelector("input[name='SoDienThoai']").value = nv.SoDienThoai || "";
+        document.querySelector("input[name='SoDienThoai']").value = nv.SDT || "";
         document.querySelector("input[name='DiaChi']").value = nv.DiaChi || "";
 
         // Lưu trạng thái đang edit
