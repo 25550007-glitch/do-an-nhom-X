@@ -8,6 +8,21 @@ document.getElementById('currentDate').textContent = new Date().toLocaleDateStri
     day: 'numeric'
 });
 
+async function loadSelectPhongBan() {
+    const res = await fetch("api/get_phongban.php");
+    const data = await res.json();
+
+    const select = document.getElementById("selectPhongBan");
+    select.innerHTML = '<option value="">-- Chọn phòng ban --</option>';
+
+    data.forEach(pb => {
+        const option = document.createElement("option");
+        option.value = pb.MaPB;
+        option.textContent = pb.TenPhongBan;
+        select.appendChild(option);
+    });
+}
+
 // Menu Navigation
 document.querySelectorAll('.menu-item').forEach(item => {
     item.addEventListener('click', function() {
@@ -35,6 +50,36 @@ document.addEventListener("DOMContentLoaded", () => {
     loadNhanVien();
     loadChamCong();
     loadLuong();
+    loadSelectPhongBan();
+
+    document.getElementById("btnThemNhanVien").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const form = document.getElementById('formNhanVien');
+    const formData = new FormData(form);
+
+    try {
+        const response = await fetch("api/add_nhanvien.php", {
+            method: "POST",
+            body: formData
+        });
+
+        const result = await response.json();
+        console.log("✅ Kết quả API:", result);
+
+        if (result.success) {
+            alert("🎉 Thêm nhân viên thành công!");
+            form.reset();
+
+            loadNhanVien();
+        } else {
+            alert("❌ Lỗi thêm nhân viên: " + (result.error || "Không rõ lỗi"));
+        }
+    } catch (error) {
+        console.error("Lỗi khi gửi dữ liệu:", error);
+        alert("🚨 Không thể kết nối đến server!");
+    }
+});
 
 
     // Gửi form tính lương
