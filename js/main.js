@@ -1,4 +1,5 @@
 console.log("🚀 main.js loaded thành công!");
+let editingMaNV = null; // nếu null => đang thêm mới, có giá trị => đang sửa
 
 // Hiển thị ngày hiện tại
 document.getElementById('currentDate').textContent = new Date().toLocaleDateString('vi-VN', {
@@ -7,6 +8,21 @@ document.getElementById('currentDate').textContent = new Date().toLocaleDateStri
     month: 'long',
     day: 'numeric'
 });
+
+async function loadSelectPhongBan() {
+    const res = await fetch("api/get_phongban.php");
+    const data = await res.json();
+
+    const select = document.getElementById("selectPhongBan");
+    select.innerHTML = '<option value="">-- Chọn phòng ban --</option>';
+
+    data.forEach(pb => {
+        const option = document.createElement("option");
+        option.value = pb.MaPB;
+        option.textContent = pb.TenPhongBan;
+        select.appendChild(option); 
+    });
+}
 
 // Menu Navigation
 document.querySelectorAll('.menu-item').forEach(item => {
@@ -35,6 +51,45 @@ document.addEventListener("DOMContentLoaded", () => {
     loadNhanVien();
     loadChamCong();
     loadLuong();
+    loadSelectPhongBan();
+
+    document.getElementById("btnThemNhanVien").addEventListener("click", async (e) => {
+        e.preventDefault();
+
+        const form = document.getElementById("formNhanVien");
+        const formData = new FormData(form);
+
+        // Nếu đang chỉnh sửa thì thêm MaNV vào formData để backend biết
+        if (editingMaNV) {
+            formData.append("MaNV", editingMaNV);
+        }
+
+        const apiUrl = editingMaNV ? "api/edit_nhanvien.php" : "api/add_nhanvien.php";
+        const actionText = editingMaNV ? "Cập nhật" : "Thêm";
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await response.json();
+            console.log(`Kết quả ${actionText}:`, result);
+
+            if (result.success) {
+                alert(`${actionText} nhân viên thành công!`);
+                form.reset();
+                editingMaNV = null;
+                document.getElementById("btnThemNhanVien").innerHTML = "<span>➕</span> Thêm Nhân Viên";
+                loadNhanVien();
+            } else {
+                alert(`❌ Lỗi ${actionText.toLowerCase()} nhân viên: ${result.error || "Không rõ lỗi"}`);
+            }
+        } catch (error) {
+            console.error("Lỗi khi gửi dữ liệu:", error);
+            alert("Không thể kết nối đến server!");
+        }
+    });
 
 
     // Gửi form tính lương
@@ -81,9 +136,10 @@ async function loadPhongBan() {
 async function loadNhanVien() {
     const res = await fetch("api/get_nhanvien.php");
     const data = await res.json();
+       const nhanviens = data.nhanvien;
     const tbody = document.getElementById("tableNhanVien");
     tbody.innerHTML = "";
-    data.forEach(nv => {
+    nhanviens.forEach(nv => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
             <td>${nv.MaNV}</td>
@@ -91,6 +147,8 @@ async function loadNhanVien() {
             <td>${nv.TenPhongBan || "-"}</td>
             <td>${Number(nv.LuongCB).toLocaleString()} ₫</td>
             <td>${nv.SDT || ""}</td>
+            <td>${nv.NgaySinh || "-"}</td>
+            <td>${nv.NgayVaoLam || "-"}</td>
             <td>${nv.TrangThai}</td>
             <td><button class="btn-edit" onclick="editNhanVien('${nv.MaNV}')">✏️</button></td>
         `;
@@ -122,7 +180,7 @@ async function loadChamCong() {
             tbody.appendChild(tr);
         });
     } catch (error) {
-        console.error("❌ Lỗi load chấm công:", error);
+        console.error("Lỗi load chấm công:", error);
     }
 }
 
@@ -177,6 +235,40 @@ async function loadLuong(thang) {
         document.getElementById("sumTotal").textContent = tongTongLuong.toLocaleString() + "đ";
 
     } catch (error) {
-        console.error("❌ Lỗi load lương:", error);
+        console.error("Lỗi load lương:", error);
+    }
+}
+
+async function editNhanVien(MaNV) {
+    try {
+        const response = await fetch(`api/get_nhanvien.php?MaNV=${MaNV}`);
+        const data = await response.json();
+
+        if (!data.success || !data.nhanvien) {
+            alert("❌ Không tìm thấy dữ liệu nhân viên!");
+            return;
+        }
+
+        const nv = data.nhanvien;
+        console.log("🧩 Dữ liệu nhân viên:", nv);
+
+        // Gán dữ liệu lên form
+        document.querySelector("input[name='MaNV']").value = nv.MaNV;
+        document.querySelector("input[name='TenNV']").value = nv.HoTen;
+        document.querySelector("select[name='MaPB']").value = nv.MaPB || "";
+        document.querySelector("input[name='LuongCoBan']").value = nv.LuongCB || 0;
+        document.querySelector("input[name='NgaySinh']").value = nv.NgaySinh || "";
+        document.querySelector("input[name='NgayVaoLam']").value = nv.NgayVaoLam || "";
+        document.querySelector("input[name='SoDienThoai']").value = nv.SDT || "";
+        document.querySelector("input[name='DiaChi']").value = nv.DiaChi || "";
+
+        // Lưu trạng thái đang edit
+        editingMaNV = nv.MaNV;
+
+        // Đổi nút thành “Lưu chỉnh sửa”
+        document.getElementById("btnThemNhanVien").innerHTML = "<span>💾</span> Lưu Chỉnh Sửa";
+    } catch (err) {
+        console.error("Lỗi khi lấy dữ liệu nhân viên:", err);
+        alert("Không thể tải thông tin nhân viên để chỉnh sửa!");
     }
 }
