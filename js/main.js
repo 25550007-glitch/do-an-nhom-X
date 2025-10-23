@@ -394,6 +394,7 @@ async function filterChamCong() {
                 <td>${cc.GhiChu || ""}</td>
                 <td>
                     <button class="btn-edit" onclick="editChamCong('${cc.MaNV}', '${cc.Ngay}')">✏️</button>
+                    <button class="btn-delete" onclick="deleteChamCong('${cc.MaNV}', '${cc.Ngay}')">🗑️</button>
                 </td>
             `;
             tbody.appendChild(tr);
@@ -470,8 +471,20 @@ const gioLamInput = document.getElementById("gioLam");
 
     if (!gioVao || !gioRa) return;
 
-    const [vaoH, vaoM] = gioVao.split(":").map(Number);
-    const [raH, raM] = gioRa.split(":").map(Number);
+    let [vaoH, vaoM] = gioVao.split(":").map(Number);
+    let [raH, raM] = gioRa.split(":").map(Number);
+
+    // Giới hạn giờ ra tối đa là 17:00
+    if (raH > 17 || (raH === 17 && raM > 0)) {
+        raH = 17;
+        raM = 0;
+    }
+
+    // Giới hạn giờ vào sớm nhất là 08:00 (nếu đi sớm hơn vẫn tính từ 8h)
+    if (vaoH < 8) {
+        vaoH = 8;
+        vaoM = 0;
+    }
 
     let start = vaoH * 60 + vaoM;
     let end = raH * 60 + raM;
