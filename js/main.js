@@ -24,6 +24,22 @@ async function loadSelectPhongBan() {
     });
 }
 
+async function loadSelectNhanVien() {
+    const res = await fetch("api/get_nhanvien.php");
+    const data = await res.json();
+
+    const select = document.getElementById("selectNhanVien");
+    select.innerHTML = '<option value="">-- Chọn nhân viên --</option>';
+
+    data.forEach(nv => {
+        const option = document.createElement("option");
+        option.value = nv.MaNV;
+        option.textContent = nv.HoTen;
+        select.appendChild(option);
+    });
+}
+
+
 // Menu Navigation
 document.querySelectorAll('.menu-item').forEach(item => {
     item.addEventListener('click', function() {
@@ -52,6 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadChamCong();
     loadLuong();
     loadSelectPhongBan();
+    loadSelectNhanVien();
 
     document.getElementById("btnThemNhanVien").addEventListener("click", async (e) => {
         e.preventDefault();
