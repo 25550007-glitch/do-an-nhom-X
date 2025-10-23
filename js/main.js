@@ -28,16 +28,30 @@ async function loadSelectPhongBan() {
 async function loadSelectNhanVien() {
     const res = await fetch("api/get_nhanvien.php");
     const data = await res.json();
-console.log("✅ Data nhân viên:", data);
-    const select = document.getElementById("selectNhanVien");
-    select.innerHTML = '<option value="">-- Chọn nhân viên --</option>';
+    const selectForm = document.getElementById("selectNhanVien");
+    const selectFilter = document.getElementById("filterNhanVienCC");
+    
+    if (selectForm) selectForm.innerHTML = '<option value="">-- Chọn nhân viên --</option>';
+    if (selectFilter) selectFilter.innerHTML = '<option value="">Tất cả</option>';
 
-    data.nhanvien.forEach(nv => {
-        const option = document.createElement("option");
-        option.value = nv.MaNV;
-        option.textContent = nv.HoTen;
-        select.appendChild(option);
-    });
+     // Duyệt danh sách nhân viên
+        data.nhanvien.forEach(nv => {
+            // Option cho form
+            if (selectForm) {
+                const opt1 = document.createElement("option");
+                opt1.value = nv.MaNV;
+                opt1.textContent = nv.HoTen;
+                selectForm.appendChild(opt1);
+            }
+
+            // Option cho filter
+            if (selectFilter) {
+                const opt2 = document.createElement("option");
+                opt2.value = nv.MaNV;
+                opt2.textContent = nv.HoTen;
+                selectFilter.appendChild(opt2);
+            }
+        });
 }
 
 
@@ -70,6 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadLuong();
     loadSelectPhongBan();
     loadSelectNhanVien();
+    filterChamCong();
 
     // Gửi form thêm/chỉnh sửa nhân viên
     document.getElementById("btnThemNhanVien").addEventListener("click", async (e) => {
@@ -266,7 +281,11 @@ async function loadChamCong() {
                 <td>${cc.LoaiCong || "-"}</td>
                 <td>${cc.TrangThai || "-"}</td>
                 <td>${cc.GhiChu || ""}</td>
-                <td><button class="btn-edit" onclick="editChamCong('${cc.MaNV}', '${cc.Ngay}')">✏️</button></td>
+                <td>
+                    <button class="btn-edit" onclick="editChamCong('${cc.MaNV}', '${cc.Ngay}')">✏️</button>
+                    <button class="btn-delete" onclick="deleteChamCong('${cc.MaNV}', '${cc.Ngay}')">🗑️</button>
+                </td>
+                
             `;
             tbody.appendChild(tr);
         });
@@ -308,6 +327,80 @@ async function editChamCong(maNV, ngay) {
         btn.dataset.editMode = "true"; // đánh dấu đang ở chế độ edit
     } catch (err) {
         alert("Lỗi khi tải dữ liệu chấm công: " + err.message);
+    }
+}
+
+async function deleteChamCong(maNV, ngay) {
+    if (!confirm("⚠️ Bạn có chắc muốn xoá chấm công này không?")) return;
+
+    try {
+        const res = await fetch("api/delete_chamcong.php", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: `MaNV=${encodeURIComponent(maNV)}&Ngay=${encodeURIComponent(ngay)}`
+        });
+
+        const result = await res.json();
+
+        if (result.success) {
+            alert("✅ " + result.message);
+            loadChamCong(); // reload lại danh sách
+        } else {
+            alert("❌ " + result.message);
+        }
+    } catch (error) {
+        alert("🚨 Lỗi khi xoá: " + error.message);
+    }
+}
+
+async function filterChamCong() {
+    try {
+        const thang = document.getElementById("filterThangCC")?.value || "";
+        const nam = document.getElementById("filterNamCC")?.value || "";
+        const maNV = document.getElementById("filterNhanVienCC")?.value || "";
+        const loaiCong = document.getElementById("filterLoaiCong")?.value || "";
+
+        const params = new URLSearchParams({
+            Thang: thang,
+            Nam: nam,
+            MaNV: maNV,
+            LoaiCong: loaiCong
+        });
+
+        const res = await fetch(`api/get_chamcong.php?${params.toString()}`);
+        const data = await res.json();
+
+        const tbody = document.getElementById("tableChamCong");
+        tbody.innerHTML = "";
+
+        if (data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;">Không có dữ liệu phù hợp 🫠</td></tr>`;
+            return;
+        }
+
+        data.forEach(cc => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${cc.Ngay}</td>
+                <td>${cc.MaNV}</td>
+                <td>${cc.HoTen || "-"}</td>
+                <td>${cc.GioVao || "-"}</td>
+                <td>${cc.GioRa || "-"}</td>
+                <td>${cc.GioLam || "0"}</td>
+                <td>${cc.LoaiCong || "-"}</td>
+                <td>${cc.TrangThai || "-"}</td>
+                <td>${cc.GhiChu || ""}</td>
+                <td>
+                    <button class="btn-edit" onclick="editChamCong('${cc.MaNV}', '${cc.Ngay}')">✏️</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch (error) {
+        console.error("⚠️ Lỗi khi lọc chấm công:", error);
+        alert("🚨 Có lỗi khi lọc dữ liệu!");
     }
 }
 

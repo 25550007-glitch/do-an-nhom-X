@@ -9,8 +9,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $thang = intval($_POST['Thang']);
     $nam = intval($_POST['Nam']);
 
-    // Số giờ làm chuẩn trong tháng (26 ngày x 8 tiếng)
-    $gioChuan = 208;
+    // Số giờ làm chuẩn trong tháng (23 ngày làm việc x 8 tiếng)
+    $gioChuan = 184;
 
     // Xóa dữ liệu cũ để tính lại
     $conn->query("DELETE FROM Luong WHERE Thang = $thang AND Nam = $nam");
@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             nv.LuongCB,
 
             /* Tổng giờ làm trong tháng */
-            ROUND(IFNULL(AVG(cc.GioLam), 0) * 26, 2) AS TongGioLam,
+            ROUND(IFNULL(AVG(cc.GioLam), 0) * 23, 2) AS TongGioLam,
 
             0 AS TangCa, 
             0 AS Thuong,
@@ -33,9 +33,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             /* Khấu trừ theo yêu cầu: nếu thiếu giờ thì (gioChuan - TongGioLam) * (LuongCB / gioChuan) else 0 */
             CASE
-                WHEN ROUND(IFNULL(AVG(cc.GioLam), 0) * 26, 2) < $gioChuan
+                WHEN ROUND(IFNULL(AVG(cc.GioLam), 0) * 23, 2) < $gioChuan
                 THEN ROUND(
-                    ($gioChuan - (IFNULL(AVG(cc.GioLam), 0) * 26)) * (nv.LuongCB / $gioChuan), 2
+                    ($gioChuan - (IFNULL(AVG(cc.GioLam), 0) * 23)) * (nv.LuongCB / $gioChuan), 2
                 )
                 ELSE 0
             END AS KhauTru,
@@ -44,8 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ROUND(
                 nv.LuongCB
                 - CASE
-                    WHEN ROUND(IFNULL(AVG(cc.GioLam), 0) * 26, 2) < $gioChuan
-                    THEN (($gioChuan - (IFNULL(AVG(cc.GioLam), 0) * 26)) * (nv.LuongCB / $gioChuan))
+                    WHEN ROUND(IFNULL(AVG(cc.GioLam), 0) * 23, 2) < $gioChuan
+                    THEN (($gioChuan - (IFNULL(AVG(cc.GioLam), 0) * 23)) * (nv.LuongCB / $gioChuan))
                     ELSE 0 END
                 + 0 + 0 + 0
             , 2) AS TongLuong
