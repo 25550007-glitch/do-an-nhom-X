@@ -474,17 +474,33 @@ const gioLamInput = document.getElementById("gioLam");
     let [vaoH, vaoM] = gioVao.split(":").map(Number);
     let [raH, raM] = gioRa.split(":").map(Number);
 
-    // Giới hạn giờ ra tối đa là 17:00
-    if (raH > 17 || (raH === 17 && raM > 0)) {
-        raH = 17;
-        raM = 0;
+    const vaoPhut = vaoH * 60 + vaoM;
+    const raPhut = raH * 60 + raM;
+
+    let minutes = 0;
+
+    if (vaoPhut >= 17 * 60) {
+        // Làm tăng ca (bắt đầu sau 5h chiều) => tính giờ bình thường
+        if (raPhut < vaoPhut) {
+        // qua ngày hôm sau
+        minutes = (24 * 60 - vaoPhut) + raPhut;
+        } else {
+        minutes = raPhut - vaoPhut;
+        }
+    } else {
+    // 🔹 Làm giờ hành chính
+    // Giới hạn giờ vào sớm nhất là 08:00
+    if (vaoH < 8) {
+      vaoH = 8;
+      vaoM = 0;
     }
 
-    // Giới hạn giờ vào sớm nhất là 08:00 (nếu đi sớm hơn vẫn tính từ 8h)
-    if (vaoH < 8) {
-        vaoH = 8;
-        vaoM = 0;
+    // Giới hạn giờ ra tối đa là 17:00
+    if (raH > 17 || (raH === 17 && raM > 0)) {
+      raH = 17;
+      raM = 0;
     }
+  }
 
     let start = vaoH * 60 + vaoM;
     let end = raH * 60 + raM;
@@ -492,7 +508,7 @@ const gioLamInput = document.getElementById("gioLam");
     // Nếu giờ ra nhỏ hơn giờ vào -> qua ngày hôm sau
     if (end < start) end += 24 * 60;
 
-    let minutes = end - start;
+    minutes = end - start;
 
      // Trừ 1 tiếng nghỉ trưa nếu làm qua khung giờ 12h–13h
     if (start < 12 * 60 && end > 13 * 60) {
