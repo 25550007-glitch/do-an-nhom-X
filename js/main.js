@@ -12,6 +12,7 @@ document.getElementById('currentDate').textContent = new Date().toLocaleDateStri
 async function loadSelectPhongBan() {
     const res = await fetch("api/get_phongban.php");
     const data = await res.json();
+          
 
     const select = document.getElementById("selectPhongBan");
     select.innerHTML = '<option value="">-- Chọn phòng ban --</option>';
@@ -27,11 +28,11 @@ async function loadSelectPhongBan() {
 async function loadSelectNhanVien() {
     const res = await fetch("api/get_nhanvien.php");
     const data = await res.json();
-
+console.log("✅ Data nhân viên:", data);
     const select = document.getElementById("selectNhanVien");
     select.innerHTML = '<option value="">-- Chọn nhân viên --</option>';
 
-    data.forEach(nv => {
+    data.nhanvien.forEach(nv => {
         const option = document.createElement("option");
         option.value = nv.MaNV;
         option.textContent = nv.HoTen;
@@ -70,6 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadSelectPhongBan();
     loadSelectNhanVien();
 
+    // Gửi form thêm/chỉnh sửa nhân viên
     document.getElementById("btnThemNhanVien").addEventListener("click", async (e) => {
         e.preventDefault();
 
@@ -108,7 +110,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-
     // Gửi form tính lương
     document.getElementById('btnTinhLuong').addEventListener('click', async () => {
         const form = document.getElementById('formTinhLuong');
@@ -131,6 +132,45 @@ document.addEventListener("DOMContentLoaded", () => {
             alert("Đã xảy ra lỗi khi tính lương!");
         }
     });
+
+    // Gửi form chấm công
+    document.getElementById("btnThemChamCong").addEventListener("click", async () => {
+    const form = document.getElementById("formChamCong");
+    const formData = new FormData(form);
+    const btn = document.getElementById("btnThemChamCong");
+
+    const isEdit = btn.dataset.editMode === "true";
+    const apiUrl = isEdit ? "api/edit_chamcong.php" : "api/add_chamcong.php";
+
+    try {
+        const res = await fetch(apiUrl, {
+            method: "POST",
+            body: formData
+        });
+
+        const result = await res.json();
+
+        if (result.success) {
+            alert("✅ " + result.message);
+            form.reset();
+            document.getElementById("gioVao").value = "08:00";
+            document.getElementById("gioRa").value = "17:00";
+            document.getElementById("gioLam").value = "8";
+
+            // Reset nút lại về chế độ thêm
+            btn.innerHTML = `<span>💾</span> Lưu Chấm Công`;
+            delete btn.dataset.editMode;
+        } else {
+            alert("❌ " + result.message);
+        }
+
+        loadChamCong();
+    } catch (error) {
+        alert("🚨 Lỗi khi gửi yêu cầu: " + error.message);
+    }
+});
+
+
 });
 
 async function loadPhongBan() {
@@ -173,6 +213,40 @@ async function loadNhanVien() {
     });
 }
 
+async function editNhanVien(MaNV) {
+    try {
+        const response = await fetch(`api/get_nhanvien.php?MaNV=${MaNV}`);
+        const data = await response.json();
+
+        if (!data.success || !data.nhanvien) {
+            alert("❌ Không tìm thấy dữ liệu nhân viên!");
+            return;
+        }
+
+        const nv = data.nhanvien;
+        console.log("🧩 Dữ liệu nhân viên:", nv);
+
+        // Gán dữ liệu lên form
+        document.querySelector("input[name='MaNV']").value = nv.MaNV;
+        document.querySelector("input[name='TenNV']").value = nv.HoTen;
+        document.querySelector("select[name='MaPB']").value = nv.MaPB || "";
+        document.querySelector("input[name='LuongCoBan']").value = nv.LuongCB || 0;
+        document.querySelector("input[name='NgaySinh']").value = nv.NgaySinh || "";
+        document.querySelector("input[name='NgayVaoLam']").value = nv.NgayVaoLam || "";
+        document.querySelector("input[name='SoDienThoai']").value = nv.SDT || "";
+        document.querySelector("input[name='DiaChi']").value = nv.DiaChi || "";
+
+        // Lưu trạng thái đang edit
+        editingMaNV = nv.MaNV;
+
+        // Đổi nút thành “Lưu chỉnh sửa”
+        document.getElementById("btnThemNhanVien").innerHTML = "<span>💾</span> Lưu Chỉnh Sửa";
+    } catch (err) {
+        console.error("Lỗi khi lấy dữ liệu nhân viên:", err);
+        alert("Không thể tải thông tin nhân viên để chỉnh sửa!");
+    }
+}
+
 async function loadChamCong() {
     try {
         const res = await fetch("api/get_chamcong.php");
@@ -198,6 +272,42 @@ async function loadChamCong() {
         });
     } catch (error) {
         console.error("Lỗi load chấm công:", error);
+    }
+}
+
+async function editChamCong(maNV, ngay) {
+    try {
+        const res = await fetch(`api/get_chamcong.php?MaNV=${maNV}&Ngay=${ngay}`);
+        const data = await res.json();
+
+        // tìm dòng chấm công cần sửa
+        const record = data.find(cc => cc.MaNV === maNV && cc.Ngay === ngay);
+        if (!record) return alert("Không tìm thấy dữ liệu chấm công!");
+
+        // Gán dữ liệu vào form
+         // Nếu chưa load danh sách nhân viên thì chờ load xong mới gán
+        const select = document.getElementById("selectNhanVien");
+
+        // Đợi một chút để chắc chắn select có đầy đủ option (nếu load async)
+        if (select.options.length <= 1) {
+            await loadNhanVien(); // gọi lại API load nhân viên
+        }
+
+        // Gán giá trị cho form
+        select.value = record.MaNV;
+        document.querySelector('[name="Ngay"]').value = record.Ngay;
+        document.querySelector('[name="GioVao"]').value = record.GioVao;
+        document.querySelector('[name="GioRa"]').value = record.GioRa;
+        document.querySelector('[name="GioLam"]').value = record.GioLam;
+        document.querySelector('[name="LoaiCong"]').value = record.LoaiCong;
+        document.querySelector('[name="GhiChu"]').value = record.GhiChu;
+
+        // đổi text nút
+        const btn = document.getElementById("btnThemChamCong");
+        btn.innerHTML = `<span>💾</span> Cập Nhật Chấm Công`;
+        btn.dataset.editMode = "true"; // đánh dấu đang ở chế độ edit
+    } catch (err) {
+        alert("Lỗi khi tải dữ liệu chấm công: " + err.message);
     }
 }
 
@@ -256,36 +366,36 @@ async function loadLuong(thang) {
     }
 }
 
-async function editNhanVien(MaNV) {
-    try {
-        const response = await fetch(`api/get_nhanvien.php?MaNV=${MaNV}`);
-        const data = await response.json();
 
-        if (!data.success || !data.nhanvien) {
-            alert("❌ Không tìm thấy dữ liệu nhân viên!");
-            return;
-        }
+const gioVaoInput = document.getElementById("gioVao");
+const gioRaInput = document.getElementById("gioRa");
+const gioLamInput = document.getElementById("gioLam");
 
-        const nv = data.nhanvien;
-        console.log("🧩 Dữ liệu nhân viên:", nv);
+  function tinhGioLam() {
+    const gioVao = gioVaoInput.value;
+    const gioRa = gioRaInput.value;
 
-        // Gán dữ liệu lên form
-        document.querySelector("input[name='MaNV']").value = nv.MaNV;
-        document.querySelector("input[name='TenNV']").value = nv.HoTen;
-        document.querySelector("select[name='MaPB']").value = nv.MaPB || "";
-        document.querySelector("input[name='LuongCoBan']").value = nv.LuongCB || 0;
-        document.querySelector("input[name='NgaySinh']").value = nv.NgaySinh || "";
-        document.querySelector("input[name='NgayVaoLam']").value = nv.NgayVaoLam || "";
-        document.querySelector("input[name='SoDienThoai']").value = nv.SDT || "";
-        document.querySelector("input[name='DiaChi']").value = nv.DiaChi || "";
+    if (!gioVao || !gioRa) return;
 
-        // Lưu trạng thái đang edit
-        editingMaNV = nv.MaNV;
+    const [vaoH, vaoM] = gioVao.split(":").map(Number);
+    const [raH, raM] = gioRa.split(":").map(Number);
 
-        // Đổi nút thành “Lưu chỉnh sửa”
-        document.getElementById("btnThemNhanVien").innerHTML = "<span>💾</span> Lưu Chỉnh Sửa";
-    } catch (err) {
-        console.error("Lỗi khi lấy dữ liệu nhân viên:", err);
-        alert("Không thể tải thông tin nhân viên để chỉnh sửa!");
+    let start = vaoH * 60 + vaoM;
+    let end = raH * 60 + raM;
+
+    // Nếu giờ ra nhỏ hơn giờ vào -> qua ngày hôm sau
+    if (end < start) end += 24 * 60;
+
+    let minutes = end - start;
+
+     // Trừ 1 tiếng nghỉ trưa nếu làm qua khung giờ 12h–13h
+    if (start < 12 * 60 && end > 13 * 60) {
+        minutes -= 60;
     }
-}
+
+    const hours = (minutes / 60).toFixed(1); // làm tròn 1 chữ số thập phân
+    gioLamInput.value = hours;
+  }
+
+  gioVaoInput.addEventListener("change", tinhGioLam);
+  gioRaInput.addEventListener("change", tinhGioLam);
