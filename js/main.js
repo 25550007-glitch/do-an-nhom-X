@@ -25,6 +25,21 @@ async function loadSelectPhongBan() {
     });
 }
 
+async function loadSelectFilterPhongBan() {
+    const res = await fetch("api/get_phongban.php");
+    const data = await res.json();
+    const select = document.getElementById("filterPhongBanLuong");
+    select.innerHTML = '<option value="">Tất cả phòng ban</option>';
+
+    data.forEach(pb => {
+        const option = document.createElement("option");
+        option.value = pb.MaPB;
+        option.textContent = pb.TenPhongBan;
+        select.appendChild(option);
+    });
+}
+
+
 async function loadSelectNhanVien() {
     const res = await fetch("api/get_nhanvien.php");
     const data = await res.json();
@@ -81,10 +96,11 @@ document.addEventListener("DOMContentLoaded", () => {
     loadPhongBan();
     loadNhanVien();
     loadChamCong();
-    loadLuong();
     loadSelectPhongBan();
+    loadSelectFilterPhongBan();
     loadSelectNhanVien();
     filterChamCong();
+    handleLoadLuong()
 
     // Gửi form thêm/chỉnh sửa nhân viên
     document.getElementById("btnThemNhanVien").addEventListener("click", async (e) => {
@@ -131,6 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const formData = new FormData(form);
 
         const thang = formData.get("Thang");
+        const nam = formData.get("Nam");
 
         try {
             const response = await fetch('api/tinh_luong.php', {
@@ -141,7 +158,7 @@ document.addEventListener("DOMContentLoaded", () => {
             console.log(result);
 
             // Sau khi tính xong có thể load lại danh sách lương
-            loadLuong(thang); 
+            loadLuong(thang, nam); 
         } catch (error) {
             console.error("Lỗi:", error);
             alert("Đã xảy ra lỗi khi tính lương!");
@@ -405,61 +422,148 @@ async function filterChamCong() {
     }
 }
 
-async function loadLuong(thang) {
+// 📥 Load lương chi tiết từng nhân viên
+async function loadLuong(thang, nam) {
     try {
-        const res = await fetch(`api/get_luong.php?thang=${thang}`);
+        const res = await fetch(`api/get_luong.php?Thang=${thang}&Nam=${nam}`);
         const data = await res.json();
-        const tbody = document.getElementById("tableLuong");
-        tbody.innerHTML = "";
 
-        let tongLuongCB = 0, tongGioLam = 0, tongTangCa = 0, tongThuong = 0, tongPhuCap = 0, tongKhauTru = 0, tongTongLuong = 0;
-
-        data.forEach((l, index) => {
-            tongLuongCB += Number(l.LuongCB);
-            tongGioLam += Number(l.TongGioLam);
-            tongTangCa += Number(l.TangCa);
-            tongThuong += Number(l.Thuong);
-            tongPhuCap += Number(l.PhuCap);
-            tongKhauTru += Number(l.KhauTru);
-            tongTongLuong += Number(l.TongLuong);
-
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${l.MaNV}</td>
-                <td>${l.HoTen}</td>
-                <td>${l.TenPhongBan || "-"}</td>
-                <td>${Number(l.LuongCB).toLocaleString()} ₫</td>
-                <td>${Number(l.TongGioLam).toLocaleString()}</td>
-                <td>${Number(l.TangCa).toLocaleString()} ₫</td>
-                <td>${Number(l.Thuong).toLocaleString()} ₫</td>
-                <td>${Number(l.PhuCap).toLocaleString()} ₫</td>
-                <td>${Number(l.KhauTru).toLocaleString()} ₫</td>
-                <td style="font-weight:bold; color:#dc3545">${Number(l.TongLuong).toLocaleString()} ₫</td>
-                <td><button class="btn-edit" onclick="editLuong('${l.MaNV}')">✏️</button></td>
-            `;
-            tbody.appendChild(tr);
-        });
-
-        // Footer tổng cộng
-        document.getElementById("footerLuongCB").textContent = tongLuongCB.toLocaleString() + "đ";
-        document.getElementById("footerTheoGio").textContent = tongGioLam.toLocaleString();
-        document.getElementById("footerTangCa").textContent = tongTangCa.toLocaleString() + "đ";
-        document.getElementById("footerThuong").textContent = tongThuong.toLocaleString() + "đ";
-        document.getElementById("footerPhuCap").textContent = tongPhuCap.toLocaleString() + "đ";
-        document.getElementById("footerKhauTru").textContent = tongKhauTru.toLocaleString() + "đ";
-        document.getElementById("footerTotal").textContent = tongTongLuong.toLocaleString() + "đ";
-
-        document.getElementById("sumLuongCB").textContent = tongLuongCB.toLocaleString() + "đ";
-        document.getElementById("sumTangCa").textContent = tongTangCa.toLocaleString() + "đ";
-        document.getElementById("sumThuong").textContent = tongThuong.toLocaleString() + "đ";
-        document.getElementById("sumTotal").textContent = tongTongLuong.toLocaleString() + "đ";
+        renderBangChiTiet(data);
 
     } catch (error) {
         console.error("Lỗi load lương:", error);
     }
 }
 
+
+// 📥 Load lương tổng hợp theo phòng ban
+async function loadLuongPhongBan(thang, nam, maPB) {
+    try {
+        const res = await fetch(`api/get_luong_phongban.php?Thang=${thang}&Nam=${nam}&MaPB=${maPB}`);
+        const data = await res.json();
+
+        renderBangPhongBan(data);
+
+    } catch (error) {
+        console.error("Lỗi load lương phòng ban:", error);
+    }
+}
+
+async function handleLoadLuong() {
+    const thang = document.getElementById("filterThangLuong").value;
+    const nam = document.getElementById("filterNamLuong").value;
+    const maPB = document.getElementById("filterPhongBanLuong").value;
+
+    if (maPB === "" || maPB === "all") {
+        // Hiển thị chi tiết tất cả nhân viên
+        await loadLuong(thang, nam);
+    } else {
+        // Gom nhóm theo phòng ban
+        await loadLuongPhongBan(thang, nam, maPB);
+    }
+}
+
+// 🧾 Render bảng chi tiết từng nhân viên
+function renderBangChiTiet(data) {
+    const table = document.getElementById("tableSalary");
+    const thead = table.querySelector("thead");
+    const tbody = document.getElementById("tableLuong");
+    const tfoot = table.querySelector("tfoot");
+
+    // 👉 Cập nhật header đúng cấu trúc
+    thead.innerHTML = `
+        <tr>
+            <th>STT</th>
+            <th>Mã NV</th>
+            <th>Họ Tên</th>
+            <th>Phòng Ban</th>
+            <th>Lương CB</th>
+            <th>Tổng số giờ</th>
+            <th>Tăng Ca</th>
+            <th>Thưởng</th>
+            <th>Phụ Cấp</th>
+            <th>Khấu Trừ</th>
+            <th>Tổng Lương</th>
+            <th>Thao Tác</th>
+        </tr>
+    `;
+
+    tfoot.style.display = ""; // hiện tổng cộng
+    tbody.innerHTML = "";
+
+    let tongLuongCB = 0, tongGioLam = 0, tongTangCa = 0, tongThuong = 0, tongPhuCap = 0, tongKhauTru = 0, tongTongLuong = 0;
+
+    data.forEach((l, i) => {
+        tongLuongCB += Number(l.LuongCB);
+        tongGioLam += Number(l.TongGioLam);
+        tongTangCa += Number(l.TangCa);
+        tongThuong += Number(l.Thuong);
+        tongPhuCap += Number(l.PhuCap);
+        tongKhauTru += Number(l.KhauTru);
+        tongTongLuong += Number(l.TongLuong);
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${i + 1}</td>
+            <td>${l.MaNV}</td>
+            <td>${l.HoTen}</td>
+            <td>${l.TenPhongBan || "-"}</td>
+            <td>${Number(l.LuongCB).toLocaleString()} ₫</td>
+            <td>${Number(l.TongGioLam).toLocaleString()}</td>
+            <td>${Number(l.TangCa).toLocaleString()} ₫</td>
+            <td>${Number(l.Thuong).toLocaleString()} ₫</td>
+            <td>${Number(l.PhuCap).toLocaleString()} ₫</td>
+            <td>${Number(l.KhauTru).toLocaleString()} ₫</td>
+            <td style="font-weight:bold; color:#dc3545">${Number(l.TongLuong).toLocaleString()} ₫</td>
+            <td><button class="btn-edit" onclick="editLuong('${l.MaNV}')">✏️</button></td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    // Footer tổng cộng
+    document.getElementById("footerLuongCB").textContent = tongLuongCB.toLocaleString() + "đ";
+    document.getElementById("footerTheoGio").textContent = tongGioLam.toLocaleString();
+    document.getElementById("footerTangCa").textContent = tongTangCa.toLocaleString() + "đ";
+    document.getElementById("footerThuong").textContent = tongThuong.toLocaleString() + "đ";
+    document.getElementById("footerPhuCap").textContent = tongPhuCap.toLocaleString() + "đ";
+    document.getElementById("footerKhauTru").textContent = tongKhauTru.toLocaleString() + "đ";
+    document.getElementById("footerTotal").textContent = tongTongLuong.toLocaleString() + "đ";
+}
+
+
+// 🧩 Render bảng gom nhóm theo phòng ban
+function renderBangPhongBan(data) {
+    const table = document.getElementById("tableSalary");
+    const thead = table.querySelector("thead");
+    const tbody = document.getElementById("tableLuong");
+    const tfoot = table.querySelector("tfoot");
+
+    // 👉 Thay header mới
+    thead.innerHTML = `
+        <tr>
+            <th>STT</th>
+            <th>Mã Phòng Ban</th>
+            <th>Phòng Ban</th>
+            <th>Số Nhân Viên</th>
+            <th>Tổng Lương</th>
+        </tr>
+    `;
+
+    tfoot.style.display = "none"; // ẩn tổng chi tiết
+    tbody.innerHTML = "";
+
+    data.forEach((item, i) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${i + 1}</td>
+            <td>${item.MaPB}</td>
+            <td>${item.TenPhongBan}</td>
+            <td>${item.SoNhanVien}</td>
+            <td style="font-weight:bold; color:#dc3545">${Number(item.TongLuong).toLocaleString()} ₫</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
 
 const gioVaoInput = document.getElementById("gioVao");
 const gioRaInput = document.getElementById("gioRa");
