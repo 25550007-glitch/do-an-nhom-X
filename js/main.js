@@ -158,6 +158,10 @@ document.addEventListener("DOMContentLoaded", () => {
             console.log(result);
 
             // Sau khi tính xong có thể load lại danh sách lương
+            document.getElementById("filterThangLuong").value = thang;
+            document.getElementById("filterNamLuong").value = nam;
+
+            // Sau khi tính xong có thể load lại danh sách lương
             loadLuong(thang, nam); 
         } catch (error) {
             console.error("Lỗi:", error);
@@ -441,7 +445,7 @@ async function filterChamCong() {
 // 📥 Load lương chi tiết từng nhân viên
 async function loadLuong(thang, nam) {
     try {
-        const res = await fetch(`api/get_luong.php?Thang=${thang}&Nam=${nam}`);
+        const res = await fetch(`api/get_luong.php?thang=${thang}&nam=${nam}`);
         const data = await res.json();
 
         renderBangChiTiet(data);
@@ -518,6 +522,10 @@ function renderBangChiTiet(data) {
         tongTongLuong += Number(l.TongLuong);
 
         const tr = document.createElement("tr");
+
+        // Nếu tổng lương = 0 thì highlight nền đỏ nhạt
+        const highlight = Number(l.TongLuong) === 0 ? 'background-color: #ffe5e5;' : '';
+
         tr.innerHTML = `
             <td>${i + 1}</td>
             <td>${l.MaNV}</td>
@@ -532,6 +540,7 @@ function renderBangChiTiet(data) {
             <td style="font-weight:bold; color:#dc3545">${Number(l.TongLuong).toLocaleString()} ₫</td>
             <td><button class="btn-edit" onclick="editLuong('${l.MaNV}')">✏️</button></td>
         `;
+        tr.setAttribute("style", highlight); // áp dụng highlight nếu cần
         tbody.appendChild(tr);
     });
 
@@ -543,8 +552,15 @@ function renderBangChiTiet(data) {
     document.getElementById("footerPhuCap").textContent = tongPhuCap.toLocaleString() + "đ";
     document.getElementById("footerKhauTru").textContent = tongKhauTru.toLocaleString() + "đ";
     document.getElementById("footerTotal").textContent = tongTongLuong.toLocaleString() + "đ";
-}
 
+    // 🧾 Cập nhật khối tổng hợp phía trên
+    document.getElementById("sumLuongCB").textContent = tongLuongCB.toLocaleString() + "đ";
+    document.getElementById("sumTangCa").textContent = tongTangCa.toLocaleString() + "đ";
+    document.getElementById("sumThuong").textContent = tongThuong.toLocaleString() + "đ";
+    document.getElementById("sumKhauTru").textContent = tongKhauTru.toLocaleString() + "đ";
+    document.getElementById("sumTotal").textContent = tongTongLuong.toLocaleString() + "đ";
+
+}
 
 // 🧩 Render bảng gom nhóm theo phòng ban
 function renderBangPhongBan(data) {

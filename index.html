@@ -77,7 +77,6 @@
                                 📊 Tổng Quan Hệ Thống
                             </div>
                         </div>
-                        <h2 style="text-align:center;">Biểu đồ thống kê lương theo quý</h2>
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>Quý</label>
@@ -367,6 +366,38 @@
                         </form>
                     </div>
 
+                    <!-- Form nhập lương thưởng -->
+                    <div class="card" style="margin-top: 20px;">
+                        <div class="card-header">
+                            <div class="card-title">💎 Nhập Thưởng & Phụ Cấp</div>
+                        </div>
+                        <form id="formThuongPhuCap">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Nhân Viên <span class="required">*</span></label>
+                                    <select name="MaNV" id="selectNhanVienThuong" required>
+                                        <option value="">-- Chọn nhân viên --</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Thưởng (VNĐ)</label>
+                                    <input type="number" name="Thuong" value="0" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label>Phụ Cấp (VNĐ)</label>
+                                    <input type="number" name="PhuCap" value="0" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label>Khấu Trừ (VNĐ)</label>
+                                    <input type="number" name="KhauTru" value="0" min="0">
+                                </div>
+                            </div>
+                            <button type="button" id="btnCapNhatThuong" class="btn btn-primary">
+                                <span>💾</span> Cập Nhật Thưởng / Phụ Cấp
+                            </button>
+                        </form>
+                    </div>
+
                     <!-- BẢNG LƯƠNG CHI TIẾT -->
                     <div class="card">
                         <div class="card-header">
@@ -407,7 +438,12 @@
                             </div>
                             <div>
                                 <div style="font-size: 12px; color: #6c757d;">Tổng Thưởng</div>
-                                <div style="font-size: 20px; font-weight: bold; color: #17a2b8;" id="sumThuong">0đ</div>
+                                <div style="font-size: 20px; font-weight: bold; color: #328E6E;" id="sumThuong">0đ</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: #6c757d;">Tổng Khấu trừ</div>
+                                <div style="font-size: 20px; font-weight: bold; color: #17a2b8;" id="sumKhauTru">0đ
+                                </div>
                             </div>
                             <div>
                                 <div style="font-size: 12px; color: #6c757d;">TỔNG CHI TRẢ</div>
@@ -456,6 +492,6 @@
     </div>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="./js/main.js?v=3"></script>
+<script src="./js/main.js?v=2"></script>
 
 </html>
