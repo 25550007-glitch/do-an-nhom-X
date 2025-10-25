@@ -522,6 +522,10 @@ function renderBangChiTiet(data) {
         tongTongLuong += Number(l.TongLuong);
 
         const tr = document.createElement("tr");
+
+        // Nếu tổng lương = 0 thì highlight nền đỏ nhạt
+        const highlight = Number(l.TongLuong) === 0 ? 'background-color: #ffe5e5;' : '';
+
         tr.innerHTML = `
             <td>${i + 1}</td>
             <td>${l.MaNV}</td>
@@ -536,6 +540,7 @@ function renderBangChiTiet(data) {
             <td style="font-weight:bold; color:#dc3545">${Number(l.TongLuong).toLocaleString()} ₫</td>
             <td><button class="btn-edit" onclick="editLuong('${l.MaNV}')">✏️</button></td>
         `;
+        tr.setAttribute("style", highlight); // áp dụng highlight nếu cần
         tbody.appendChild(tr);
     });
 
