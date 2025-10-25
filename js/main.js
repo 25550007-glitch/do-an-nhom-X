@@ -201,9 +201,25 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("🚨 Lỗi khi gửi yêu cầu: " + error.message);
     }
 });
-
-
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+  const quySelect = document.getElementById('Quy');
+  const namInput = document.getElementById('Nam');
+
+  // Gán quý hiện tại mặc định
+  const month = new Date().getMonth() + 1;
+  const quyHienTai = Math.ceil(month / 3);
+  quySelect.value = quyHienTai;
+
+  // Render biểu đồ lần đầu
+  taiBieuDo();
+
+  // Khi user đổi quý hoặc năm -> render lại chart
+  quySelect.addEventListener('change', taiBieuDo);
+  namInput.addEventListener('change', taiBieuDo);
+});
+
 
 async function loadPhongBan() {
     const res = await fetch("api/get_phongban.php");
@@ -435,7 +451,6 @@ async function loadLuong(thang, nam) {
     }
 }
 
-
 // 📥 Load lương tổng hợp theo phòng ban
 async function loadLuongPhongBan(thang, nam, maPB) {
     try {
@@ -625,3 +640,69 @@ const gioLamInput = document.getElementById("gioLam");
 
   gioVaoInput.addEventListener("change", tinhGioLam);
   gioRaInput.addEventListener("change", tinhGioLam);
+
+
+async function taiBieuDo() {
+  const quy = document.getElementById('Quy').value;
+  const nam = document.getElementById('Nam').value;
+
+  if (!quy) {
+    if (window.luongChart) { window.luongChart.destroy(); window.luongChart = null; }
+    return; // chưa chọn quý => xóa chart nếu có
+  }
+
+  try {
+    const res = await fetch(`api/chart_luong_quy.php?quy=${encodeURIComponent(quy)}&nam=${encodeURIComponent(nam)}`);
+    if (!res.ok) throw new Error('Lấy dữ liệu thất bại!');
+    const data = await res.json();
+
+    const ctx = document.getElementById('chartLuong').getContext('2d');
+
+    // phá biểu đồ cũ nếu có
+    if (window.luongChart) window.luongChart.destroy();
+
+    if (!data.length) {
+      alert('Không có dữ liệu cho quý này!');
+      return;
+    }
+
+    const labels = data.map(item => 'Tháng ' + item.Thang);
+    const luong = data.map(item => Number(item.TongLuongThang) || 0);
+
+    window.luongChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Tổng lương theo tháng (VNĐ)',
+          data: luong,
+          backgroundColor: 'rgba(54, 162, 235, 0.6)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'top' },
+          title: {
+            display: true,
+            text: `Thống kê lương Quý ${quy} năm ${nam}`
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: value => value.toLocaleString('vi-VN')
+            }
+          }
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error(error);
+    alert('Lỗi khi tải dữ liệu!');
+  }
+}
