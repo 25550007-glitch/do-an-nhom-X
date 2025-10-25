@@ -45,9 +45,11 @@ async function loadSelectNhanVien() {
     const data = await res.json();
     const selectForm = document.getElementById("selectNhanVien");
     const selectFilter = document.getElementById("filterNhanVienCC");
+    const selectThuong = document.getElementById("selectNhanVienThuong");
     
     if (selectForm) selectForm.innerHTML = '<option value="">-- Chọn nhân viên --</option>';
     if (selectFilter) selectFilter.innerHTML = '<option value="">Tất cả</option>';
+    if (selectThuong) selectThuong.innerHTML = '<option value="">-- Chọn nhân viên --</option>';
 
      // Duyệt danh sách nhân viên
         data.nhanvien.forEach(nv => {
@@ -65,6 +67,14 @@ async function loadSelectNhanVien() {
                 opt2.value = nv.MaNV;
                 opt2.textContent = nv.HoTen;
                 selectFilter.appendChild(opt2);
+            }
+
+            // Option cho thuong phụ cấp
+            if (selectThuong) {
+                const opt3 = document.createElement("option");
+                opt3.value = nv.MaNV;
+                opt3.textContent = nv.HoTen;
+                selectThuong.appendChild(opt3);
             }
         });
 }
@@ -204,7 +214,28 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (error) {
         alert("🚨 Lỗi khi gửi yêu cầu: " + error.message);
     }
-});
+    });
+
+    // Gửi form cập nhật thưởng/phụ cấp
+    document.getElementById("btnCapNhatThuong").addEventListener("click", async () => {
+    const form = document.getElementById("formThuongPhuCap");
+    const formData = new FormData(form);
+
+     const thang = formData.get("Thang");
+
+    try {
+        const res = await fetch("api/update_thuong_phucap.php", {
+        method: "POST",
+        body: formData
+        });
+        const result = await res.json();
+        alert(result.message || "Cập nhật thành công!");
+        await loadLuong(thang, new Date().getFullYear());
+    } catch (err) {
+        console.error(err);
+        alert("Lỗi khi cập nhật thưởng/phụ cấp!");
+    }
+    });
 });
 
 document.addEventListener('DOMContentLoaded', () => {
