@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 26, 2025 lúc 02:17 PM
--- Phiên bản máy phục vụ: 8.0.43
--- Phiên bản PHP: 8.2.12
+-- Thời gian đã tạo: Th10 27, 2025 lúc 02:10 PM
+-- Phiên bản máy phục vụ: 10.4.28-MariaDB
+-- Phiên bản PHP: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -92,13 +92,41 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
+-- Cấu trúc bảng cho bảng `admin`
+--
+
+CREATE TABLE `admin` (
+  `MaAdmin` int(11) NOT NULL,
+  `HoTen` varchar(100) NOT NULL,
+  `Email` varchar(100) NOT NULL,
+  `TenDangNhap` varchar(50) NOT NULL,
+  `MatKhau` varchar(255) NOT NULL,
+  `SoDienThoai` varchar(15) DEFAULT NULL,
+  `VaiTro` enum('Super Admin','Admin','HR Manager') DEFAULT 'Admin',
+  `TrangThai` enum('Hoạt động','Bị khóa') DEFAULT 'Hoạt động',
+  `NgayTao` datetime DEFAULT current_timestamp(),
+  `LanDangNhapCuoi` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `admin`
+--
+
+INSERT INTO `admin` (`MaAdmin`, `HoTen`, `Email`, `TenDangNhap`, `MatKhau`, `SoDienThoai`, `VaiTro`, `TrangThai`, `NgayTao`, `LanDangNhapCuoi`) VALUES
+(1, 'Nguyễn Văn Admin', 'admin@company.com', 'admin', '$2y$10$kRpzXVF0Cm2HGBUbntgQHeWgUQhN0FE0TGG3Kg3TdlezgsovAB.Oi', '0901234567', 'Super Admin', 'Hoạt động', '2025-10-27 17:31:00', NULL),
+(2, 'Trần Thị Thúy Hằng', 'hang.tran@company.com', 'hang_hr', '$2y$10$VKWIoJsAcKevo7kk7H.zguLOfaCLjAY3hvzzJr8PURWFPXFjnVF56', '0902345678', 'HR Manager', 'Hoạt động', '2025-10-27 17:31:00', NULL),
+(3, 'Nguyễn Nhật Vy', 'vy.nguyen@company.com', 'vy_hr', '$2y$10$fX17L9XXI9Bg0haS28J.q.XKWBx7OgP2MP7mhgN/USxjUr1PAIxs.', '0903456789', 'HR Manager', 'Hoạt động', '2025-10-27 17:31:00', NULL);
+
+-- --------------------------------------------------------
+
+--
 -- Cấu trúc bảng cho bảng `chamcong`
 --
 
 CREATE TABLE `chamcong` (
-  `MaCC` int NOT NULL,
+  `MaCC` int(11) NOT NULL,
   `Ngay` date NOT NULL,
-  `MaNV` int NOT NULL,
+  `MaNV` int(11) NOT NULL,
   `GioVao` time DEFAULT NULL,
   `GioRa` time DEFAULT NULL,
   `GioLam` decimal(4,2) DEFAULT NULL,
@@ -236,7 +264,6 @@ INSERT INTO `chamcong` (`MaCC`, `Ngay`, `MaNV`, `GioVao`, `GioRa`, `GioLam`, `Lo
 (131, '2025-10-31', 14, '08:00:00', '17:00:00', 8.00, 'Công thường', 'Đã duyệt', NULL),
 (132, '2025-10-31', 8, '08:00:00', '17:00:00', 8.00, 'Công thường', 'Đã duyệt', NULL),
 (133, '2025-10-31', 9, '08:00:00', '17:00:00', 8.00, 'Công thường', 'Đã duyệt', NULL),
-(134, '2025-10-31', 10, '08:00:00', '17:00:00', 8.00, 'Công thường', 'Đã duyệt', NULL),
 (135, '2025-10-21', 12, '08:00:00', '17:00:00', 8.00, 'Công thường', 'Đã duyệt', NULL),
 (136, '2025-10-21', 13, '08:00:00', '17:00:00', 8.00, 'Công thường', 'Đã duyệt', NULL),
 (137, '2025-10-21', 11, '08:00:00', '17:00:00', 8.00, 'Công thường', 'Đã duyệt', NULL),
@@ -696,9 +723,9 @@ INSERT INTO `chamcong` (`MaCC`, `Ngay`, `MaNV`, `GioVao`, `GioRa`, `GioLam`, `Lo
 (616, '2025-11-28', 14, '09:00:00', '17:00:00', 7.00, 'Công thường', 'Đã duyệt', 'đi muộn'),
 (617, '2025-11-28', 8, '08:00:00', '17:00:00', 8.00, 'Công thường', 'Đã duyệt', NULL),
 (618, '2025-11-28', 9, '08:00:00', '17:00:00', 8.00, 'Công thường', 'Đã duyệt', NULL),
-(619, '2025-11-28', 10, '08:00:00', '17:00:00', 8.00, 'Công thường', 'Đã duyệt', NULL);
+(619, '2025-11-28', 10, '08:00:00', '17:00:00', 8.00, 'Công thường', 'Đã duyệt', NULL),
+(620, '2025-11-18', 1, '08:00:00', '17:00:00', 8.00, 'Công thường', 'Đã duyệt', NULL);
 INSERT INTO `chamcong` (`MaCC`, `Ngay`, `MaNV`, `GioVao`, `GioRa`, `GioLam`, `LoaiCong`, `TrangThai`, `GhiChu`) VALUES
-(620, '2025-11-18', 1, '08:00:00', '17:00:00', 8.00, 'Công thường', 'Đã duyệt', NULL),
 (621, '2025-11-18', 5, '08:00:00', '17:00:00', 8.00, 'Công thường', 'Đã duyệt', NULL),
 (622, '2025-11-18', 12, '08:00:00', '17:00:00', 8.00, 'Công thường', 'Đã duyệt', NULL),
 (623, '2025-11-18', 2, '08:00:00', '17:00:00', 8.00, 'Công thường', 'Đã duyệt', NULL),
@@ -1111,16 +1138,16 @@ INSERT INTO `chamcong` (`MaCC`, `Ngay`, `MaNV`, `GioVao`, `GioRa`, `GioLam`, `Lo
 --
 
 CREATE TABLE `luong` (
-  `MaLuong` int NOT NULL,
-  `MaNV` int NOT NULL,
+  `MaLuong` int(11) NOT NULL,
+  `MaNV` int(11) NOT NULL,
   `Thang` char(7) NOT NULL,
-  `Nam` int NOT NULL,
+  `Nam` int(11) NOT NULL,
   `LuongCB` decimal(12,2) DEFAULT NULL,
-  `TongGioLam` decimal(12,2) DEFAULT '0.00',
-  `TangCa` decimal(12,2) DEFAULT '0.00',
-  `Thuong` decimal(12,2) DEFAULT '0.00',
-  `PhuCap` decimal(12,2) DEFAULT '0.00',
-  `KhauTru` decimal(12,2) DEFAULT '0.00',
+  `TongGioLam` decimal(12,2) DEFAULT 0.00,
+  `TangCa` decimal(12,2) DEFAULT 0.00,
+  `Thuong` decimal(12,2) DEFAULT 0.00,
+  `PhuCap` decimal(12,2) DEFAULT 0.00,
+  `KhauTru` decimal(12,2) DEFAULT 0.00,
   `TongLuong` decimal(12,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -1182,9 +1209,9 @@ INSERT INTO `luong` (`MaLuong`, `MaNV`, `Thang`, `Nam`, `LuongCB`, `TongGioLam`,
 --
 
 CREATE TABLE `nhanvien` (
-  `MaNV` int NOT NULL,
+  `MaNV` int(11) NOT NULL,
   `HoTen` varchar(100) NOT NULL,
-  `MaPB` int DEFAULT NULL,
+  `MaPB` int(11) DEFAULT NULL,
   `LuongCB` decimal(12,2) NOT NULL,
   `NgaySinh` date DEFAULT NULL,
   `NgayVaoLam` date DEFAULT NULL,
@@ -1220,10 +1247,10 @@ INSERT INTO `nhanvien` (`MaNV`, `HoTen`, `MaPB`, `LuongCB`, `NgaySinh`, `NgayVao
 --
 
 CREATE TABLE `phongban` (
-  `MaPB` int NOT NULL,
+  `MaPB` int(11) NOT NULL,
   `TenPhongBan` varchar(100) NOT NULL,
-  `MoTa` text,
-  `NgayTao` date DEFAULT (curdate())
+  `MoTa` text DEFAULT NULL,
+  `NgayTao` date DEFAULT curdate()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -1240,9 +1267,62 @@ INSERT INTO `phongban` (`MaPB`, `TenPhongBan`, `MoTa`, `NgayTao`) VALUES
 (7, 'Kho', 'Quản lý hàng hóa, nhập xuất tồn kho', '2025-10-25'),
 (8, 'Bảo Vệ', 'Đảm bảo an ninh, an toàn cho công ty', '2025-10-25');
 
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `sessionlog`
+--
+
+CREATE TABLE `sessionlog` (
+  `MaLog` int(11) NOT NULL,
+  `MaAdmin` int(11) NOT NULL,
+  `IP` varchar(45) DEFAULT NULL,
+  `UserAgent` varchar(255) DEFAULT NULL,
+  `ThoiGianDangNhap` datetime DEFAULT current_timestamp(),
+  `ThoiGianDangXuat` datetime DEFAULT NULL,
+  `TrangThai` enum('Đang hoạt động','Đã đăng xuất') DEFAULT 'Đang hoạt động'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc đóng vai cho view `vw_admininfo`
+-- (See below for the actual view)
+--
+CREATE TABLE `vw_admininfo` (
+`MaAdmin` int(11)
+,`HoTen` varchar(100)
+,`Email` varchar(100)
+,`TenDangNhap` varchar(50)
+,`SoDienThoai` varchar(15)
+,`VaiTro` enum('Super Admin','Admin','HR Manager')
+,`TrangThai` enum('Hoạt động','Bị khóa')
+,`NgayTao` datetime
+,`LanDangNhapCuoi` datetime
+);
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc cho view `vw_admininfo`
+--
+DROP TABLE IF EXISTS `vw_admininfo`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vw_admininfo`  AS SELECT `admin`.`MaAdmin` AS `MaAdmin`, `admin`.`HoTen` AS `HoTen`, `admin`.`Email` AS `Email`, `admin`.`TenDangNhap` AS `TenDangNhap`, `admin`.`SoDienThoai` AS `SoDienThoai`, `admin`.`VaiTro` AS `VaiTro`, `admin`.`TrangThai` AS `TrangThai`, `admin`.`NgayTao` AS `NgayTao`, `admin`.`LanDangNhapCuoi` AS `LanDangNhapCuoi` FROM `admin` ;
+
 --
 -- Chỉ mục cho các bảng đã đổ
 --
+
+--
+-- Chỉ mục cho bảng `admin`
+--
+ALTER TABLE `admin`
+  ADD PRIMARY KEY (`MaAdmin`),
+  ADD UNIQUE KEY `Email` (`Email`),
+  ADD UNIQUE KEY `TenDangNhap` (`TenDangNhap`),
+  ADD KEY `idx_email` (`Email`),
+  ADD KEY `idx_username` (`TenDangNhap`);
 
 --
 -- Chỉ mục cho bảng `chamcong`
@@ -1272,32 +1352,51 @@ ALTER TABLE `phongban`
   ADD PRIMARY KEY (`MaPB`);
 
 --
+-- Chỉ mục cho bảng `sessionlog`
+--
+ALTER TABLE `sessionlog`
+  ADD PRIMARY KEY (`MaLog`),
+  ADD KEY `MaAdmin` (`MaAdmin`);
+
+--
 -- AUTO_INCREMENT cho các bảng đã đổ
 --
+
+--
+-- AUTO_INCREMENT cho bảng `admin`
+--
+ALTER TABLE `admin`
+  MODIFY `MaAdmin` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT cho bảng `chamcong`
 --
 ALTER TABLE `chamcong`
-  MODIFY `MaCC` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1433;
+  MODIFY `MaCC` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1433;
 
 --
 -- AUTO_INCREMENT cho bảng `luong`
 --
 ALTER TABLE `luong`
-  MODIFY `MaLuong` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=770;
+  MODIFY `MaLuong` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=770;
 
 --
 -- AUTO_INCREMENT cho bảng `nhanvien`
 --
 ALTER TABLE `nhanvien`
-  MODIFY `MaNV` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `MaNV` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT cho bảng `phongban`
 --
 ALTER TABLE `phongban`
-  MODIFY `MaPB` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `MaPB` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT cho bảng `sessionlog`
+--
+ALTER TABLE `sessionlog`
+  MODIFY `MaLog` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Các ràng buộc cho các bảng đã đổ
@@ -1320,6 +1419,12 @@ ALTER TABLE `luong`
 --
 ALTER TABLE `nhanvien`
   ADD CONSTRAINT `nhanvien_ibfk_1` FOREIGN KEY (`MaPB`) REFERENCES `phongban` (`MaPB`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `sessionlog`
+--
+ALTER TABLE `sessionlog`
+  ADD CONSTRAINT `sessionlog_ibfk_1` FOREIGN KEY (`MaAdmin`) REFERENCES `admin` (`MaAdmin`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
