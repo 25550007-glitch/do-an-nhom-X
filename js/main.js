@@ -9,6 +9,7 @@ document.getElementById('currentDate').textContent = new Date().toLocaleDateStri
     day: 'numeric'
 });
 
+
 async function loadSelectPhongBan() {
     const res = await fetch("api/get_phongban.php");
     const data = await res.json();

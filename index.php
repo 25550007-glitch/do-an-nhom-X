@@ -1,11 +1,132 @@
+<?php
+// Đặt ở đầu file PHP (trước mọi HTML output)
+session_start();
+
+// Kiểm tra đăng nhập
+if (!isset($_SESSION['admin_id'])) {
+    header('Location: pages/login.php');
+    exit;
+}
+
+// Lấy thông tin từ session
+$adminName = $_SESSION['admin_name'] ?? 'Khách';
+$adminRole = $_SESSION['admin_role'] ?? '';
+?>
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ Thống HR - Quản Lý Nhân Viên</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <link rel="stylesheet" href="./assets/style.css">
+    <style>
+    .header-actions {
+        display: flex;
+        gap: 2px;
+        align-items: center;
+        position: relative;
+        display: inline-block;
+    }
+
+    .wrap-left .header-actions {
+        padding-top: 5px;
+    }
+
+    .user-display {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        background: linear-gradient(135deg, #667eea 0%, #1e3c72 100%);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+    .user-display >*{
+        color: #fff;
+    }
+    .user-display:hover {
+      opacity: 0.8;
+    }
+
+    .user-name {
+        font-weight: 500;
+        font-size: 14px;
+        color: #fff;
+    }
+
+    .dropdown-arrow {
+        font-size: 12px;
+        transition: transform 0.3s;
+        color: #fff;
+    }
+
+    .user-display:hover .dropdown-arrow {
+        transform: rotate(180deg);
+    }
+
+    .dropdown-menu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        margin-top: 8px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        min-width: -webkit-fill-available;
+        z-index: 1000;
+    }
+
+    .dropdown-menu.show {
+        display: block;
+    }
+
+    .dropdown-item {
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #333;
+        text-decoration: none;
+        transition: background 0.2s;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .dropdown-item:first-child {
+        border-radius: 8px 8px 0 0;
+    }
+
+    .dropdown-item:last-child {
+        border-bottom: none;
+        border-radius: 0 0 8px 8px;
+    }
+
+    .dropdown-item:hover {
+        background: #f5f5f5;
+    }
+
+    .dropdown-item.logout {
+        color: #dc3545;
+    }
+
+    .dropdown-item.logout:hover {
+        background: #fff5f5;
+    }
+
+    .role-badge {
+        display: block;
+        width: 100%;
+        padding: 4px 8px;
+        background: #1e3c72;
+        color: #fff;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+    </style>
 </head>
 
 <body>
@@ -53,9 +174,30 @@
         <!-- Main Content -->
         <div class="main-content">
             <div class="header">
-                <h1 id="pageTitle">Dashboard</h1>
-                <div class="header-actions">
-                    ⏰<span id="currentDate"></span>
+                <div class="wrap-left">
+                    <h1 id="pageTitle">Dashboard</h1>
+                    <div class="header-actions">
+                        ⏰<span id="currentDate"></span>
+                    </div>
+                </div>
+                 <div class="header-actions">
+                    <div class="user-display" onclick="toggleDropdown()">
+                        <span><i class="fas fa-user"></i></span>
+                        <span class="user-name"><?php echo htmlspecialchars($adminName); ?></span>
+                        <span class="dropdown-arrow">▼</span>
+                    </div>
+                    
+                    <div class="dropdown-menu" id="userDropdown">
+                        <div class="dropdown-item">
+                            <div class="role-badge">
+                                <span ><?php echo htmlspecialchars($adminRole); ?></span>
+                            </div>
+                        </div>
+                        <a href="api/logout.php" class="dropdown-item logout">
+                            <span><i class="fas fa-sign-out-alt"></i></span>
+                            <span>Đăng xuất</span>
+                        </a>
+                    </div>
                 </div>
             </div>
 
@@ -515,5 +657,25 @@
 </body>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="./js/main.js?v=2"></script>
+<script>
+    function toggleDropdown() {
+        const dropdown = document.getElementById('userDropdown');
+        dropdown.classList.toggle('show');
+     }
 
+    // Đóng dropdown khi click bên ngoài
+    window.addEventListener('click', function(e) {
+        if (!e.target.closest('.header-actions')) {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.remove('show');
+        }
+    });
+    // Đóng dropdown khi click bên ngoài
+    window.addEventListener('click', function(e) {
+        if (!e.target.closest('.header-actions')) {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.remove('show');
+        }
+    });
+</script>
 </html>
