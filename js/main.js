@@ -474,17 +474,48 @@ async function filterChamCong() {
 }
 
 // 📥 Load lương chi tiết từng nhân viên
-async function loadLuong(thang, nam) {
+async function loadLuong(thang, nam, modeParam = "") {
     try {
-        const res = await fetch(`api/get_luong.php?thang=${thang}&nam=${nam}`);
+        const res = await fetch(`api/get_luong.php?thang=${thang}&nam=${nam}${modeParam}`);
         const data = await res.json();
-
+        // Kiểm tra nếu có chế độ bảo mật
+        if (data.secure) {
+        renderBangChiTiet(data.data);
+        renderTongLuong(data.tong); // hàm riêng để hiển thị tổng
+        } else {
         renderBangChiTiet(data);
+        }
 
     } catch (error) {
         console.error("Lỗi load lương:", error);
     }
 }
+
+function renderTongLuong(tong) {
+  document.getElementById("footerLuongCB").textContent = Number(tong.TongLuongCB).toLocaleString() + "đ";
+  document.getElementById("footerTangCa").textContent = Number(tong.TongTangCa).toLocaleString() + "đ";
+  document.getElementById("footerThuong").textContent = Number(tong.TongThuong).toLocaleString() + "đ";
+  document.getElementById("footerPhuCap").textContent = Number(tong.TongPhuCap).toLocaleString() + "đ";
+  document.getElementById("footerKhauTru").textContent = Number(tong.TongKhauTru).toLocaleString() + "đ";
+  document.getElementById("footerTotal").textContent = Number(tong.TongTongLuong).toLocaleString() + "đ";
+
+  document.getElementById("sumLuongCB").textContent = Number(tong.TongLuongCB).toLocaleString() + "đ";
+  document.getElementById("sumTangCa").textContent = Number(tong.TongTangCa).toLocaleString() + "đ";
+  document.getElementById("sumThuong").textContent = Number(tong.TongThuong).toLocaleString() + "đ";
+  document.getElementById("sumKhauTru").textContent = Number(tong.TongKhauTru).toLocaleString() + "đ";
+  document.getElementById("sumTotal").textContent = Number(tong.TongTongLuong).toLocaleString() + "đ";
+}
+
+// Khi bật/tắt checkbox "Bảo mật lương" -> tự động reload bảng
+document.addEventListener("DOMContentLoaded", () => {
+  const checkboxBaoMat = document.getElementById("checkboxBaoMatLuong");
+  if (checkboxBaoMat) {
+    checkboxBaoMat.addEventListener("change", () => {
+      handleLoadLuong();
+    });
+  }
+});
+
 
 // 📥 Load lương tổng hợp theo phòng ban
 async function loadLuongPhongBan(thang, nam, maPB) {
@@ -503,10 +534,13 @@ async function handleLoadLuong() {
     const thang = document.getElementById("filterThangLuong").value;
     const nam = document.getElementById("filterNamLuong").value;
     const maPB = document.getElementById("filterPhongBanLuong").value;
+    const baoMat = document.getElementById("checkboxBaoMatLuong").checked;
+
+    const modeParam = baoMat ? "&mode=secure" : "";
 
     if (maPB === "" || maPB === "all") {
         // Hiển thị chi tiết tất cả nhân viên
-        await loadLuong(thang, nam);
+        await loadLuong(thang, nam, modeParam);
     } else {
         // Gom nhóm theo phòng ban
         await loadLuongPhongBan(thang, nam, maPB);
@@ -562,13 +596,15 @@ function renderBangChiTiet(data) {
             <td>${l.MaNV}</td>
             <td>${l.HoTen}</td>
             <td>${l.TenPhongBan || "-"}</td>
-            <td>${Number(l.LuongCB).toLocaleString()} ₫</td>
-            <td>${Number(l.TongGioLam).toLocaleString()}</td>
-            <td>${Number(l.TangCa).toLocaleString()} ₫</td>
-            <td>${Number(l.Thuong).toLocaleString()} ₫</td>
-            <td>${Number(l.PhuCap).toLocaleString()} ₫</td>
-            <td>${Number(l.KhauTru).toLocaleString()} ₫</td>
-            <td style="font-weight:bold; color:#dc3545">${Number(l.TongLuong).toLocaleString()} ₫</td>
+            <td>${isNaN(Number(l.LuongCB)) ? l.LuongCB : Number(l.LuongCB).toLocaleString()} ₫</td>
+            <td>${isNaN(Number(l.TongGioLam)) ? l.TongGioLam : Number(l.TongGioLam).toLocaleString()}</td>
+            <td>${isNaN(Number(l.TangCa)) ? l.TangCa : Number(l.TangCa).toLocaleString()} ₫</td>
+            <td>${isNaN(Number(l.Thuong)) ? l.Thuong : Number(l.Thuong).toLocaleString()} ₫</td>
+            <td>${isNaN(Number(l.PhuCap)) ? l.PhuCap : Number(l.PhuCap).toLocaleString()} ₫</td>
+            <td>${isNaN(Number(l.KhauTru)) ? l.KhauTru : Number(l.KhauTru).toLocaleString()} ₫</td>
+            <td style="font-weight:bold; color:#dc3545">
+                ${isNaN(Number(l.TongLuong)) ? l.TongLuong : Number(l.TongLuong).toLocaleString()} ₫
+            </td>
             <td><button class="btn-edit" onclick="editLuong('${l.MaNV}')">✏️</button></td>
         `;
         tr.setAttribute("style", highlight); // áp dụng highlight nếu cần
